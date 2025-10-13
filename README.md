@@ -14,6 +14,9 @@ All stable releases (including deobfuscated builds) can be found on [CurseForge]
 * Before submitting a pull request containing a new feature, please discuss this first with one of the lead developers.
 * When fixing an accepted bug, make sure to declare this in the issue so that no duplicate fixes exist.
 * All code must comply to our coding conventions, be clean and must be well documented.
+* In order to setup your dev enviorment, we need to build a few deps first:
+  1. Build and push to mavenLocal in order for each of: [IntegratedCompabilitiesAPI](https://github.com/Quantum-Studios-MC/CommonCapabilitiesAPI), [CyclopsCore](https://github.com/Quantum-Studios-MC/CyclopsCore), [CommonCapabilities](https://github.com/Quantum-Studios-MC/CommonCapabilities)
+  2. Comment out integrateddynamicscompat_version_local in build.properties, build and push to mavenLocal, build [Integrated Dynamics Compat](https://github.com/Quantum-Studios-MC/IntegratedDynamics-Compat) and push to mavelLocal, and then uncomment integrateddynamicscompat_version_local, and rebuild and push to mavenLocal.
 
 ### Issues
 * All bug reports and other issues are appreciated. If the issue is a crash, please include the FULL Forge log.
