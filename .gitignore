@@ -1,27 +1,83 @@
-# We don't want compiled stuff in here!
-/bin
-doc/info.txt
-/build
-/run
+.nopublish
 
-# Ignore project specific files
-.classpath
+### Windows ###
+
+thumbs.db
+*.db
+
+### Java ###
+
+*.class
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# Package Files #
+*.war
+*.ear
+*.txt
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+
+### Eclipse ###
+
+*.pydevproject
+.metadata
+.gradle
+bin/
+tmp/
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.settings/
+.loadpath
+/eclipse
+
+# Eclipse Core
 .project
-.settings
-.pydevproject
-eclipse/*
-.gradle/*
-repo/*
+
+# External tool builders
+.externalToolBuilders/
+
+# Locally stored "Eclipse launch configurations"
+*.launch
+
+# CDT-specific
+.cproject
+
+# JDT-specific (Eclipse Java Development Tools)
+.classpath
+
+# Java annotation processor (APT)
+.factorypath
+
+# PDT-specific
+.buildpath
+
+# sbteclipse plugin
+.target
+
+# TeXlipse plugin
+.texlipse
+
+### Intellij IDEA ###
+
 *.iml
 *.ipr
 *.iws
-out/*
-keystore.jks
 
-# Ignore mac-specific file(s)
-.DS_Store
+.idea/
+.idea_modules/
+/classes/
+/out/
+/build/
 
-# Ignore files specific to dev environments
-gradle.properties
-build_number.properties
-changelog.txt
+# Linux
+*~
+
+run/
+
+logs/
