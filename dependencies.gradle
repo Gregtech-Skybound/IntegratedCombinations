@@ -40,4 +40,12 @@
 dependencies {
     implementation rfg.deobf('curse.maven:common_capabilites-247007:3053017')
     implementation rfg.deobf('curse.maven:cyclops_core-232758:3159497')
+
+    compileOnly("org.projectlombok:lombok:1.18.42")
+    annotationProcessor("org.projectlombok:lombok:1.18.42")
+
+    testCompileOnly("org.projectlombok:lombok:1.18.42")
+    testAnnotationProcessor("org.projectlombok:lombok:1.18.42")
+
+    embed("com.google.re2j:re2j:1.8")
 }
