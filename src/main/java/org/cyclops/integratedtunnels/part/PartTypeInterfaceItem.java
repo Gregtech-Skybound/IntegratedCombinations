@@ -5,7 +5,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
+import org.cyclops.commoncapabilities.IngredientComponents;
 import org.cyclops.commoncapabilities.api.capability.itemhandler.ISlotlessItemHandler;
+import org.cyclops.cyclopscore.ingredient.collection.FilteredIngredientCollectionIterator;
 import org.cyclops.integratedtunnels.Capabilities;
 import org.cyclops.integratedtunnels.GeneralConfig;
 import org.cyclops.integratedtunnels.api.network.IItemNetwork;
@@ -116,7 +118,19 @@ public class PartTypeInterfaceItem extends PartTypeInterfacePositionedAddon<IIte
                 return Iterators.forArray();
             }
             disablePosition();
-            Iterator<ItemStack> ret = getPositionedAddonsNetwork().getChannel(getChannelInterface()).iterator();
+            Iterator<ItemStack> ret;
+            if (!this.getPositionedAddonsNetwork().getChannel(this.getChannelInterface()).iterator().hasNext()) {
+                // If the target is empty, we can safely forward this call to our index.
+                ret = this.getPositionedAddonsNetwork().getChannel(this.getChannelInterface()).iterator();
+            } else {
+                // If the target is not empty, iterate over all positions except for the target to determine items.
+                // If we would not do this, this would result in duplication of index contents, see CyclopsMC/IntegratedTerminals#109
+                IItemNetwork network = this.getPositionedAddonsNetwork();
+                ret = Iterators.concat(network.getPositions(this.getChannel()).stream()
+                        .filter(pos -> !network.isPositionDisabled(pos))
+                        .map(network::getRawInstances)
+                        .toArray(Iterator[]::new));
+            }
             enablePosition();
             return ret;
         }
@@ -127,7 +141,15 @@ public class PartTypeInterfaceItem extends PartTypeInterfacePositionedAddon<IIte
                 return Iterators.forArray();
             }
             disablePosition();
-            Iterator<ItemStack> ret = getPositionedAddonsNetwork().getChannel(getChannelInterface()).iterator(stack, matchFlags);
+            Iterator<ItemStack> ret;
+            if (!this.getPositionedAddonsNetwork().getChannel(this.getChannelInterface()).iterator(stack, matchFlags).hasNext()) {
+                // If the target is empty, we can safely forward this call to our index.
+                ret = this.getPositionedAddonsNetwork().getChannel(this.getChannelInterface()).iterator(stack, matchFlags);
+            } else {
+                // If the target is not empty, iterate over all positions except for the target to determine items.
+                // If we would not do this, this would result in duplication of index contents, see CyclopsMC/IntegratedTerminals#109
+                ret = new FilteredIngredientCollectionIterator<>(getItems(), IngredientComponents.ITEMSTACK.getMatcher(), stack, matchFlags);
+            }
             enablePosition();
             return ret;
         }
