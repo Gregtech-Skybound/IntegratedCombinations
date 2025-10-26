@@ -106,8 +106,7 @@ import java.util.Map;
      useMetadata = true,
      version = Reference.MOD_VERSION,
      dependencies = Reference.MOD_DEPENDENCIES,
-     guiFactory = "org.cyclops.integrateddynamics.GuiConfigOverview$ExtendedConfigGuiFactory",
-     certificateFingerprint = Reference.MOD_FINGERPRINT
+     guiFactory = "org.cyclops.integrateddynamics.GuiConfigOverview$ExtendedConfigGuiFactory"
 )
 public class IntegratedDynamics extends ModBaseVersionable {
 

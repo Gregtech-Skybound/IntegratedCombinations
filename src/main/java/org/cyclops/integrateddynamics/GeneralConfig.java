@@ -313,16 +313,6 @@ public class GeneralConfig extends DummyConfig {
     }
     
     @Override
-    public void onRegistered() {
-        if(analytics) {
-            Analytics.registerMod(getMod(), Reference.GA_TRACKING_ID);
-        }
-        if(versionChecker) {
-            Versions.registerMod(getMod(), IntegratedDynamics._instance, Reference.VERSION_URL);
-        }
-    }
-    
-    @Override
     public boolean isEnabled() {
         return true;
     }

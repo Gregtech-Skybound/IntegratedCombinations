@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<section name="info_book.integratedcrafting.section.main">
+    <section name="info_book.integratedcrafting.introduction">
+        <paragraph>info_book.integratedcrafting.introduction.text1</paragraph>
+        <paragraph>info_book.integratedcrafting.introduction.text2</paragraph>
+        <paragraph>info_book.integratedcrafting.introduction.text3</paragraph>
+        <paragraph>info_book.integratedcrafting.introduction.text4</paragraph>
+    </section>
+
+    <section name="info_book.integratedcrafting.crafting_interface">
+        <section name="info_book.integratedcrafting.crafting_interface.introduction">
+            <paragraph>info_book.integratedcrafting.crafting_interface.introduction.text1</paragraph>
+        </section>
+
+        <section name="info_book.integratedcrafting.crafting_interface.basics">
+            <tag>integratedcrafting:part_interface_crafting_item</tag>
+            <paragraph>info_book.integratedcrafting.crafting_interface.basics.text1</paragraph>
+            <paragraph>info_book.integratedcrafting.crafting_interface.basics.text2</paragraph>
+            <paragraph>info_book.integratedcrafting.crafting_interface.basics.text3</paragraph>
+            <appendix type="crafting_recipe">integratedcrafting:part_interface_crafting_item</appendix>
+        </section>
+
+        <section name="info_book.integratedcrafting.crafting_interface.crafting">
+            <paragraph>info_book.integratedcrafting.crafting_interface.crafting.text1</paragraph>
+            <paragraph>info_book.integratedcrafting.crafting_interface.crafting.text2</paragraph>
+            <paragraph>info_book.integratedcrafting.crafting_interface.crafting.text3</paragraph>
+            <paragraph>info_book.integratedcrafting.crafting_interface.crafting.text4</paragraph>
+            <appendix type="image" width="120" height="101">integratedcrafting:textures/gui/infobook/setup_craftingtable.png</appendix>
+            <appendix type="image" width="120" height="105">integratedcrafting:textures/gui/infobook/setup_furnace.png</appendix>
+        </section>
+
+        <section name="info_book.integratedcrafting.crafting_interface.configuration">
+            <paragraph>info_book.integratedcrafting.crafting_interface.configuration.text1</paragraph>
+            <paragraph>info_book.integratedcrafting.crafting_interface.configuration.text2</paragraph>
+        </section>
+
+        <section name="info_book.integratedcrafting.crafting_interface.recipe_feedback">
+            <paragraph>info_book.integratedcrafting.crafting_interface.recipe_feedback.text1</paragraph>
+            <paragraph>info_book.integratedcrafting.crafting_interface.recipe_feedback.text2</paragraph>
+            <paragraph>info_book.integratedcrafting.crafting_interface.recipe_feedback.text3</paragraph>
+            <paragraph>info_book.integratedcrafting.crafting_interface.recipe_feedback.text4</paragraph>
+        </section>
+
+        <section name="info_book.integratedcrafting.crafting_interface.distribution">
+            <paragraph>info_book.integratedcrafting.crafting_interface.distribution.text1</paragraph>
+            <paragraph>info_book.integratedcrafting.crafting_interface.distribution.text2</paragraph>
+        </section>
+
+        <section name="info_book.integratedcrafting.crafting_interface.dynamic_recipes">
+            <paragraph>info_book.integratedcrafting.crafting_interface.dynamic_recipes.text1</paragraph>
+            <paragraph>info_book.integratedcrafting.crafting_interface.dynamic_recipes.text2</paragraph>
+            <paragraph>info_book.integratedcrafting.crafting_interface.dynamic_recipes.text3</paragraph>
+        </section>
+
+        <section name="info_book.integratedcrafting.crafting_interface.debugging_jobs">
+            <paragraph>info_book.integratedcrafting.crafting_interface.debugging_jobs.text1</paragraph>
+            <paragraph>info_book.integratedcrafting.crafting_interface.debugging_jobs.text2</paragraph>
+            <paragraph>info_book.integratedcrafting.crafting_interface.debugging_jobs.text3</paragraph>
+        </section>
+    </section>
+
+    <section name="info_book.integratedcrafting.crafting_writer">
+        <tag>integratedcrafting:part_crafting_writer_item</tag>
+        <paragraph>info_book.integratedcrafting.crafting_writer.text1</paragraph>
+        <paragraph>info_book.integratedcrafting.crafting_writer.text2</paragraph>
+        <paragraph>info_book.integratedcrafting.crafting_writer.text3</paragraph>
+        <appendix type="crafting_recipe">integratedcrafting:part_crafting_writer_item</appendix>
+        <appendix_list factory="integrateddynamics:part_aspects">crafting_writer</appendix_list>
+    </section>
+</section>
