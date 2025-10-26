@@ -1,11 +1,11 @@
 package org.cyclops.integratedterminals.items;
 
-import com.google.common.collect.Maps;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.inventory.ItemStackHelper;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTBase;
@@ -22,6 +22,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants;
 import org.cyclops.cyclopscore.config.extendedconfig.ExtendedConfig;
 import org.cyclops.cyclopscore.config.extendedconfig.ItemConfig;
+import org.cyclops.cyclopscore.helper.InventoryHelpers;
 import org.cyclops.cyclopscore.helper.MinecraftHelpers;
 import org.cyclops.cyclopscore.item.ItemGui;
 import org.cyclops.integrateddynamics.api.network.INetwork;
@@ -35,7 +36,6 @@ import org.cyclops.integratedterminals.client.gui.container.GuiTerminalStorage;
 import org.cyclops.integratedterminals.inventory.container.ContainerTerminalStorage;
 
 import javax.annotation.Nullable;
-import java.util.Map;
 
 public class ItemTerminalStoragePortable extends ItemGui {
 
@@ -55,7 +55,8 @@ public class ItemTerminalStoragePortable extends ItemGui {
         if (world.isRemote) {
             super.openGuiForItemIndex(world, player, itemIndex, hand);
         } else {
-            ItemStack itemStack = player.getHeldItem(hand);
+            ItemStack itemStack = InventoryHelpers.getItemFromIndex(player, itemIndex);
+
             int groupId = getGroupId(itemStack);
             if (groupId >= 0) {
                 INetwork network = getNetworkFromItem(itemStack);
@@ -182,8 +183,11 @@ public class ItemTerminalStoragePortable extends ItemGui {
     }
 
     public static int getGroupId(ItemStack itemStack) {
-        return itemStack.getTagCompound().getInteger("omnidir-group-key");
+        if (itemStack != null && itemStack.hasTagCompound()) {
+            if (itemStack.getTagCompound().hasKey("omnidir-group-key")) {
+                return itemStack.getTagCompound().getInteger("omnidir-group-key");
+            }
+        }
+        return -1;
     }
-
-
 }

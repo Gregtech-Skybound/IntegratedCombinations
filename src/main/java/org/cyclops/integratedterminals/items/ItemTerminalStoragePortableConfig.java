@@ -17,7 +17,7 @@ public class ItemTerminalStoragePortableConfig extends ItemConfig {
         super(
                 IntegratedTerminals._instance,
                 true,
-                "portable_storage_terminal",
+                "terminal_storage_portable",
                 null,
                 ItemTerminalStoragePortable.class
         );

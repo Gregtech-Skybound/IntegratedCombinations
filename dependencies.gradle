@@ -48,4 +48,6 @@ dependencies {
     testAnnotationProcessor("org.projectlombok:lombok:1.18.42")
 
     embed("com.google.re2j:re2j:1.8")
+
+    testImplementation 'junit:junit:4.12'
 }
