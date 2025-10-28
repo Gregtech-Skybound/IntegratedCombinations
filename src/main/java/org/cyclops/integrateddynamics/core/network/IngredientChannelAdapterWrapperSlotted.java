@@ -1,6 +1,10 @@
 package org.cyclops.integrateddynamics.core.network;
 
 import com.google.common.collect.Iterators;
+import it.unimi.dsi.fastutil.booleans.BooleanArrayList;
+import it.unimi.dsi.fastutil.ints.Int2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2BooleanArrayMap;
+import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import org.apache.commons.lang3.tuple.Pair;
 import org.cyclops.commoncapabilities.api.ingredient.IngredientComponent;
 import org.cyclops.commoncapabilities.api.ingredient.storage.IIngredientComponentStorage;
@@ -8,9 +12,11 @@ import org.cyclops.commoncapabilities.api.ingredient.storage.IIngredientComponen
 import org.cyclops.cyclopscore.helper.Helpers;
 import org.cyclops.integrateddynamics.api.network.IPositionedAddonsNetworkIngredients;
 import org.cyclops.integrateddynamics.api.part.PartPos;
+import org.cyclops.integrateddynamics.api.part.PrioritizedPartPos;
 
 import javax.annotation.Nonnull;
 import java.util.Iterator;
+import java.util.Map;
 
 /**
  * A slotted wrapper over {@link IngredientChannelAdapter}.
@@ -25,9 +31,14 @@ import java.util.Iterator;
 public class IngredientChannelAdapterWrapperSlotted<T, M> implements IIngredientComponentStorageSlotted<T, M> {
 
     private final IngredientChannelAdapter<T, M> channel;
+    private final Int2IntMap cacheChannelSlots;
+    private final Object2BooleanOpenHashMap cacheIsLoaded;
 
-    public IngredientChannelAdapterWrapperSlotted(IngredientChannelAdapter<T, M> channel) {
+    public IngredientChannelAdapterWrapperSlotted(IngredientChannelAdapter<T, M> channel, Int2IntMap cacheChannelSlots, Object2BooleanOpenHashMap cacheIsLoaded) {
         this.channel = channel;
+        this.cacheChannelSlots = cacheChannelSlots;
+        this.cacheIsLoaded = cacheIsLoaded;
+
     }
 
     protected static int getIngredientComponentStorageSize(IIngredientComponentStorage<?, ?> storage) {
@@ -40,12 +51,30 @@ public class IngredientChannelAdapterWrapperSlotted<T, M> implements IIngredient
 
     @Override
     public int getSlots() {
-        int slots = 0;
+        int slots = this.cacheChannelSlots.getOrDefault(this.channel.getChannel(), -1);
+        if (slots != -1) {
+            return slots;
+        }
+
+        slots = 0;
         IPositionedAddonsNetworkIngredients<T, M> network = this.channel.getNetwork();
 
-        for (PartPos pos : network.getPositions()) {
+        boolean hasDisabledPosition = false;
+        for (PrioritizedPartPos prioritizedPos : network.getPositions()) {
+            PartPos pos = prioritizedPos.getPartPos();
             // Skip if the position is not loaded or disabled
-            if (!pos.getPos().isLoaded() || network.isPositionDisabled(pos)) {
+            if (this.cacheIsLoaded.containsKey(pos)) {
+                if (!cacheIsLoaded.getBoolean(pos))
+                    continue;
+            } else {
+                if (!pos.getPos().isLoaded()) {
+                    this.cacheIsLoaded.put(pos, false);
+                    continue;
+                }
+                this.cacheIsLoaded.put(pos, true);
+            }
+            if (network.isPositionDisabled(pos)) {
+                hasDisabledPosition = true;
                 continue;
             }
             network.disablePosition(pos);
@@ -54,17 +83,31 @@ public class IngredientChannelAdapterWrapperSlotted<T, M> implements IIngredient
             network.enablePosition(pos);
         }
 
+        if (!hasDisabledPosition) {
+            this.cacheChannelSlots.put(this.channel.getChannel(), slots);
+        }
         return slots;
     }
 
     protected Pair<IIngredientComponentStorage<T, M>, Integer> getStorageAndRelativeSlot(int slot) {
         IPositionedAddonsNetworkIngredients<T, M> network = this.channel.getNetwork();
-
-        for (PartPos pos : network.getPositions()) {
+        for (PrioritizedPartPos prioritizedPos : network.getPositions()) {
+            PartPos pos = prioritizedPos.getPartPos();
             // Skip if the position is not loaded or disabled
-            if (!pos.getPos().isLoaded() || network.isPositionDisabled(pos)) {
+            if (network.isPositionDisabled(pos)) {
                 continue;
             }
+            if (this.cacheIsLoaded.containsKey(pos)) {
+                if (!cacheIsLoaded.getBoolean(pos))
+                    continue;
+            } else {
+                if (!pos.getPos().isLoaded()) {
+                    this.cacheIsLoaded.put(pos, false);
+                    continue;
+                }
+                this.cacheIsLoaded.put(pos, true);
+            }
+
             network.disablePosition(pos);
             IIngredientComponentStorage<T, M> storage = network.getPositionedStorage(pos);
             int storageSize = getIngredientComponentStorageSize(storage);
@@ -75,7 +118,6 @@ public class IngredientChannelAdapterWrapperSlotted<T, M> implements IIngredient
                 slot -= storageSize;
             }
         }
-
         return Pair.of(null, -1);
     }
 

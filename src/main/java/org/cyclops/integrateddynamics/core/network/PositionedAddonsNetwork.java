@@ -2,11 +2,15 @@ package org.cyclops.integrateddynamics.core.network;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.commons.lang3.tuple.Pair;
 import org.cyclops.cyclopscore.datastructure.Wrapper;
 import org.cyclops.integrateddynamics.api.network.INetwork;
 import org.cyclops.integrateddynamics.api.network.IPartPosIteratorHandler;
@@ -15,12 +19,7 @@ import org.cyclops.integrateddynamics.api.part.PartPos;
 import org.cyclops.integrateddynamics.api.part.PrioritizedPartPos;
 
 import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * A network that can hold prioritized positions.
@@ -33,12 +32,12 @@ public abstract class PositionedAddonsNetwork implements IPositionedAddonsNetwor
     private INetwork network;
     private final Set<PrioritizedPartPos> allPositions = Sets.newTreeSet();
     private final Int2ObjectMap<Set<PrioritizedPartPos>> positions = new Int2ObjectOpenHashMap<>();
-    private final Map<PartPos, Integer> positionChannels = Maps.newHashMap();
+    private final Map<PartPos, Integer> positionChannels = new Object2IntOpenHashMap<>();
     // We store the thread id together with the disabled position.
     // This is to make sure that different threads can safely iterate over positions in parallel
     // without clashing with each other, as this could lead to problems such as in #194.
     // This for example applies to the ingredient observer and in-world ingredient movement.
-    private final Set<Pair<Long, PartPos>> disabledPositions = Sets.newHashSet();
+    private final Object2ObjectOpenHashMap<String, List<PartPos>> disabledPositions = new Object2ObjectOpenHashMap<>();
 
     private IPartPosIteratorHandler partPosIteratorHandler = null;
 
@@ -162,17 +161,36 @@ public abstract class PositionedAddonsNetwork implements IPositionedAddonsNetwor
 
     @Override
     public boolean isPositionDisabled(PartPos pos) {
-        return disabledPositions.contains(Pair.of(Thread.currentThread().getId(), pos));
+        String id = Thread.currentThread().getName();
+        if (id.equals("Server thread")) {
+            return pos.isDisabled();
+        }
+        if (disabledPositions.containsKey(id))
+            return disabledPositions.get(id).contains(pos);
+        return false;
     }
 
     @Override
     public void disablePosition(PartPos pos) {
-        disabledPositions.add(Pair.of(Thread.currentThread().getId(), pos));
+        String id = Thread.currentThread().getName();
+        if (id.equals("Server thread")) {
+            pos.setDisabled(true);
+            return;
+        }
+        if (disabledPositions.containsKey(id)) {
+            disabledPositions.get(id).add(pos);
+        }
+        disabledPositions.put(id, new ObjectArrayList<>(){{ add(pos); }});
     }
 
     @Override
     public void enablePosition(PartPos pos) {
-        disabledPositions.remove(Pair.of(Thread.currentThread().getId(), pos));
+        String id = Thread.currentThread().getName();
+        if (id.equals("Server thread")) {
+            pos.setDisabled(false);
+            return;
+        }
+        disabledPositions.get(id).remove(pos);
     }
 
 }

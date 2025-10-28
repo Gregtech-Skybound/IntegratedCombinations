@@ -38,10 +38,7 @@ public interface IPositionedAddonsNetworkIngredients<T, M> extends IPositionedAd
      * @param pos A position.
      * @return The storage, or an empty storage if none is available.
      */
-    public default IIngredientComponentStorage<T, M> getPositionedStorage(PartPos pos) {
-        IIngredientComponentStorage<T, M> storage = getPositionedStorageUnsafe(pos);
-        return storage == null ? new IngredientComponentStorageEmpty<>(getComponent()) : storage;
-    }
+    public IIngredientComponentStorage<T, M> getPositionedStorage(PartPos pos);
 
     /**
      * Get all instances at the target position.

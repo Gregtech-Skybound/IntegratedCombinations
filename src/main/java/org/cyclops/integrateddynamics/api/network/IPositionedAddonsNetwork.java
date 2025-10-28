@@ -1,10 +1,15 @@
 package org.cyclops.integrateddynamics.api.network;
 
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Iterators;
+import com.google.common.collect.Streams;
 import org.cyclops.integrateddynamics.api.part.PartPos;
 import org.cyclops.integrateddynamics.api.part.PrioritizedPartPos;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -73,8 +78,8 @@ public interface IPositionedAddonsNetwork {
     /**
      * @return All stored positions, order is undefined.
      */
-    public default Collection<PartPos> getPositions() {
-        return getPrioritizedPositions().stream().map(PrioritizedPartPos::getPartPos).collect(Collectors.toList());
+    public default Iterable<PrioritizedPartPos> getPositions() {
+        return getPrioritizedPositions();
     }
 
     /**

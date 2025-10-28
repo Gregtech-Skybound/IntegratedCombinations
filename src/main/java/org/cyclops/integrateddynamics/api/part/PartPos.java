@@ -1,5 +1,7 @@
 package org.cyclops.integrateddynamics.api.part;
 
+import lombok.Getter;
+import lombok.Setter;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -15,8 +17,14 @@ import javax.annotation.Nullable;
  */
 public class PartPos implements Comparable<PartPos> {
 
+    @Getter
     private final DimPos pos;
     private final EnumFacing side;
+    private final int hash;
+
+    @Getter
+    @Setter
+    private boolean isDisabled;
 
     public static PartPos of(World world, BlockPos pos, @Nullable EnumFacing side) {
         return of(DimPos.of(world, pos), side);
@@ -29,10 +37,7 @@ public class PartPos implements Comparable<PartPos> {
     private PartPos(DimPos pos, @Nullable EnumFacing side) {
         this.pos = pos;
         this.side = side;
-    }
-
-    public DimPos getPos() {
-        return pos;
+        this.hash = 31 * pos.hashCode() + (side != null ? side.hashCode() : 0);
     }
 
     @Nullable
@@ -43,18 +48,14 @@ public class PartPos implements Comparable<PartPos> {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || !(o instanceof PartPos)) return false;
+        if (!(o instanceof PartPos partPos)) return false;
 
-        PartPos partPos = (PartPos) o;
-
-        if (!pos.equals(partPos.pos)) return false;
-        return side == partPos.side;
-
+        return this.hash == partPos.hash;
     }
 
     @Override
     public int hashCode() {
-        return 31 * pos.hashCode() + (side != null ? side.hashCode() : 0);
+        return this.hash;
     }
 
     @Override

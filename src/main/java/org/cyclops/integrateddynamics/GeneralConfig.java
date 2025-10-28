@@ -291,7 +291,7 @@ public class GeneralConfig extends DummyConfig {
      * If the ingredient network observer can work on separate thread.
      */
     @ConfigurableProperty(category = ConfigurableTypeCategory.CORE, comment = "If the ingredient network observer can work on separate thread.", isCommandable = true)
-    public static boolean ingredientNetworkObserverEnableMultithreading = true;
+    public static boolean ingredientNetworkObserverEnableMultithreading = false;
 
     /**
      * If network change events should be logged. Only enable this when debugging.

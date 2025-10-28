@@ -607,7 +607,7 @@ public class Aspects {
                     ).handle(AspectReadBuilders.PROP_GET_INTEGER, "elementcount").buildRead();
             public static final IAspectRead<ValueTypeInteger.ValueInteger, ValueTypeInteger> INTEGER_ENERGY_BATTERY_COUNT =
                     AspectReadBuilders.Network.BUILDER_INTEGER.handle(
-                        network -> network != null && network.hasCapability(EnergyNetworkConfig.CAPABILITY) ? network.getCapability(EnergyNetworkConfig.CAPABILITY).getPositions().size() : 0
+                        network -> network != null && network.hasCapability(EnergyNetworkConfig.CAPABILITY) ? network.getCapability(EnergyNetworkConfig.CAPABILITY).getPrioritizedPositions().size() : 0
                     ).handle(AspectReadBuilders.PROP_GET_INTEGER, "energy").appendKind("batterycount").buildRead();
             public static final IAspectRead<ValueTypeInteger.ValueInteger, ValueTypeInteger> INTEGER_ENERGY_STORED =
                     AspectReadBuilders.Network.ENERGY_BUILDER.handle(

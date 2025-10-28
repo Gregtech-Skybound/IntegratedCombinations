@@ -1,13 +1,14 @@
 package org.cyclops.integrateddynamics.core.network;
 
 import com.google.common.collect.Maps;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.ints.*;
+import it.unimi.dsi.fastutil.objects.*;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.capabilities.Capability;
 import org.cyclops.commoncapabilities.api.ingredient.IngredientComponent;
 import org.cyclops.commoncapabilities.api.ingredient.storage.IIngredientComponentStorage;
 import org.cyclops.commoncapabilities.api.ingredient.storage.IIngredientComponentStorageWrapperHandler;
+import org.cyclops.commoncapabilities.api.ingredient.storage.IngredientComponentStorageEmpty;
 import org.cyclops.cyclopscore.ingredient.collection.IIngredientCollection;
 import org.cyclops.integrateddynamics.GeneralConfig;
 import org.cyclops.integrateddynamics.api.ingredient.IIngredientComponentStorageObservable;
@@ -38,9 +39,11 @@ public abstract class PositionedAddonsNetworkIngredients<T, M> extends Positione
 
     private final IngredientObserver<T, M> ingredientObserver;
     private final Int2ObjectMap<IngredientPositionsIndex<T, M>> indexes;
-
+    private final Object2ObjectOpenHashMap<PartPos, IIngredientComponentStorage<T, M>> cacheStorage;
+    private final Int2IntMap cacheChannelSlots;
+    private final Object2BooleanOpenHashMap cacheIsLoaded;
     private boolean observe;
-    private Map<PartPos, Long> lastSecondDurations = Maps.newHashMap();
+    private final Map<PartPos, Long> lastSecondDurations = Maps.newHashMap();
 
     public PositionedAddonsNetworkIngredients(IngredientComponent<T, M> component) {
         this.component = component;
@@ -49,12 +52,40 @@ public abstract class PositionedAddonsNetworkIngredients<T, M> extends Positione
         this.ingredientObserver.addChangeObserver(this);
         this.indexes = new Int2ObjectOpenHashMap<>();
 
+        // The caches are invalidated after every tick
+        this.cacheStorage = new Object2ObjectOpenHashMap<>();
+        this.cacheChannelSlots = new Int2IntOpenHashMap();
+        this.cacheIsLoaded = new Object2BooleanOpenHashMap<>();
+
         this.observe = false;
     }
 
     @Override
     public IngredientComponent<T, M> getComponent() {
         return component;
+    }
+
+    @Override
+    public IIngredientComponentStorage<T, M> getPositionedStorage(PartPos pos) {
+        IIngredientComponentStorage<T, M> storage;
+        if (this.cacheStorage.isEmpty()) {
+            storage = getPositionedStorageUnsafe(pos);
+            if (storage == null) {
+                storage = new IngredientComponentStorageEmpty<>(getComponent());
+            }
+            this.cacheStorage.put(pos, storage);
+        }
+
+        storage = this.cacheStorage.get(pos);
+        if (storage == null) {
+            storage = getPositionedStorageUnsafe(pos);
+            if (storage == null) {
+                storage = new IngredientComponentStorageEmpty<>(getComponent());
+            }
+            this.cacheStorage.put(pos, storage);
+        }
+
+        return storage;
     }
 
     @Nullable
@@ -68,7 +99,7 @@ public abstract class PositionedAddonsNetworkIngredients<T, M> extends Positione
     }
 
     @Override
-    public void onChange(IIngredientComponentStorageObservable.StorageChangeEvent<T, M> event) {
+    public void onChange(StorageChangeEvent<T, M> event) {
         applyChangesToChannel(event, event.getChannel());
         applyChangesToChannel(event, -1); // Apply all changes to "all" channels
 
@@ -77,11 +108,11 @@ public abstract class PositionedAddonsNetworkIngredients<T, M> extends Positione
         }
     }
 
-    protected void applyChangesToChannel(IIngredientComponentStorageObservable.StorageChangeEvent<T, M> event, int channel) {
+    protected void applyChangesToChannel(StorageChangeEvent<T, M> event, int channel) {
         IIngredientCollection<T, M> instances = event.getInstances();
         PrioritizedPartPos pos = event.getPos();
         IngredientPositionsIndex<T, M> index = getIndexSafe(channel);
-        if (event.getChangeType() == IIngredientComponentStorageObservable.Change.DELETION) {
+        if (event.getChangeType() == Change.DELETION) {
             index.removeAll(instances);
             if (event.isCompleteChange()) {
                 for (T instance : instances) {
@@ -93,7 +124,7 @@ public abstract class PositionedAddonsNetworkIngredients<T, M> extends Positione
             if (index.isEmpty()) {
                 this.indexes.remove(channel);
             }
-        } else if (event.getChangeType() == IIngredientComponentStorageObservable.Change.ADDITION) {
+        } else if (event.getChangeType() == Change.ADDITION) {
             index.addAll(instances);
             for (T instance : instances) {
                 index.addPosition(instance, pos);
@@ -194,7 +225,7 @@ public abstract class PositionedAddonsNetworkIngredients<T, M> extends Positione
         IIngredientComponentStorageWrapperHandler<T, M, S> wrapperHandler = getComponent()
                 .getStorageWrapperHandler(capability);
         return wrapperHandler != null ? wrapperHandler.wrapStorage(new IngredientChannelAdapterWrapperSlotted<>(
-                (IngredientChannelAdapter<T, M>) getChannel(channel))) : null;
+                (IngredientChannelAdapter<T, M>) getChannel(channel), this.cacheChannelSlots, this.cacheIsLoaded)) : null;
     }
 
     @Override
@@ -223,6 +254,11 @@ public abstract class PositionedAddonsNetworkIngredients<T, M> extends Positione
                 this.observe = false;
             }
         }
+
+        // Clear caches after each tick
+        this.cacheStorage.clear();
+        this.cacheChannelSlots.clear();
+        this.cacheIsLoaded.clear();
     }
 
     @Override
