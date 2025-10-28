@@ -62,5 +62,53 @@
     "screenshots": [],
     "dependencies": [],
     "requiredMods": [ "forge", "cyclopscore" ]
+  },
+  {
+    "modid": "integratedtunnelscompat",
+    "name": "IntegratedTunnels-Compat",
+    "description": "Integrated Tunnels compatibility with other mods",
+    "version": "${version}",
+    "mcversion": "${mcversion}",
+    "logoFile": "assets/integratedtunnelscompat/textures/logo.png",
+    "url": "https://github.com/CyclopsMC/IntegratedTunnels-Compat",
+    "updateUrl": "https://minecraft.curseforge.com/projects/TODO",
+    "authorList": [ "Irgendwer, rubensworks (aka kroeserr)" ],
+    "credits": "rubensworks (aka kroeserr)",
+    "parent": "integrateddynamics",
+    "screenshots": [],
+    "dependencies": [],
+    "requiredMods": [ "forge", "cyclopscore" ]
+  },
+  {
+    "modid": "integratedterminalscompat",
+    "name": "IntegratedTerminals-Compat",
+    "description": "Integrated Terminals compatibility with other mods. This mod is automatically packaged with Integrated Terminals.",
+    "version": "${version}",
+    "mcversion": "${mcversion}",
+    "logoFile": "assets/integratedterminalscompat/textures/logo.png",
+    "url": "https://github.com/CyclopsMC/IntegratedTerminals-Compat",
+    "updateUrl": "https://minecraft.curseforge.com/projects/TODO",
+    "authorList": [ "Irgendwer, rubensworks (aka kroeserr)" ],
+    "credits": "rubensworks (aka kroeserr)",
+    "parent": "integrateddynamics",
+    "screenshots": [],
+    "dependencies": [],
+    "requiredMods": [ "forge", "cyclopscore" ]
+  },
+  {
+    "modid": "integrateddynamicscompat",
+    "name": "IntegratedDynamics-Compat",
+    "description": "Integrated Dynamics compatibility with other mods",
+    "version": "${version}",
+    "mcversion": "${mcversion}",
+    "logoFile": "assets/integrateddynamicscompat/textures/logo.png",
+    "url": "https://github.com/CyclopsMC/IntegratedDynamics-Compat",
+    "updateUrl": "https://minecraft.curseforge.com/projects/270145",
+    "authorList": [ "rubensworks (aka kroeserr)" ],
+    "credits": "Irgendwer, rubensworks (aka kroeserr)",
+    "parent": "integrateddynamics",
+    "screenshots": [],
+    "dependencies": [],
+    "requiredMods": [ "forge", "cyclopscore", "integrateddynamics" ]
   }
 ]
