@@ -80,7 +80,7 @@ public class PartPartType extends MultipartBase {
         IPartState partState = getDelegatedPartState();
         // partstate can be null if there is not cable in this block
         if(partState != null) {
-            getPartType().addDrops(getPartTarget(), partState, drops, true);
+            getPartType().addDrops(getPartTarget(), partState, drops, true, true);
         } else {
             drops.add(getItemStack());
         }
@@ -143,7 +143,7 @@ public class PartPartType extends MultipartBase {
     @Override
     public void addCollisionBoxes(AxisAlignedBB mask, List<AxisAlignedBB> list, Entity collidingEntity) {
         AxisAlignedBB boundingBox = getRenderBoundingBox();
-        if(mask.intersectsWith(boundingBox)) {
+        if(mask.intersects(boundingBox)) {
             list.add(boundingBox);
         }
     }
@@ -167,13 +167,13 @@ public class PartPartType extends MultipartBase {
     public void onRemoved() {
         super.onRemoved();
         if (getPartCable() != null && getPartCable().hasPart(getFacing())) { // Can be false when breaking with hand.
-            PartHelpers.removePart(getWorld(), getPos(), getFacing(), null, false, false);
+            PartHelpers.removePart(getWorld(), getPos(), getFacing(), null, false, false, true);
         }
     }
 
     @Override
     public boolean onActivated(EntityPlayer player, EnumHand hand, ItemStack heldItem, PartMOP hit) {
-        World world = player.worldObj;
+        World world = player.world;
         BlockPos pos = hit.getBlockPos();
         if(!world.isRemote && WrenchHelpers.isWrench(player, heldItem, world, pos, hit.sideHit)) {
             // Remove part from cable
@@ -188,7 +188,7 @@ public class PartPartType extends MultipartBase {
                     getContainer().removePart(this);
                 } else {
                     // In this case, this part is placed on a cable, so remove it like normal.
-                    PartHelpers.removePart(world, pos, getFacing(), player, false, true);
+                    PartHelpers.removePart(world, pos, getFacing(), player, false, true, true);
                 }
                 ItemBlockCable.playBreakSound(world, pos, BlockCable.getInstance().getDefaultState());
             }
@@ -197,7 +197,7 @@ public class PartPartType extends MultipartBase {
             IPartState partState = getDelegatedPartState();
             if(partState != null) {
                 return getPartType().onPartActivated(getWorld(), getPos(), partState,
-                        player, hand, heldItem, getFacing(), (float) hit.hitVec.xCoord, (float) hit.hitVec.yCoord, (float) hit.hitVec.zCoord)
+                        player, hand, heldItem, getFacing(), (float) hit.hitVec.x, (float) hit.hitVec.y, (float) hit.hitVec.z)
                         || super.onActivated(player, hand, heldItem, hit);
             }
         }
@@ -224,7 +224,7 @@ public class PartPartType extends MultipartBase {
     }
 
     public IPartContainer getPartContainer() {
-        return PartHelpers.getPartContainer(getWorld(), getPos());
+        return PartHelpers.getPartContainer(getWorld(), getPos(), null);
     }
 
     public IPartType getPartType() {

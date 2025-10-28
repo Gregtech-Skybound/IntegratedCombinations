@@ -179,8 +179,8 @@ public class CharsetAspects {
                                         shifter.setShifting(true);
                                     } else {
                                         throw new EvaluationException(new L10NHelpers.UnlocalizedString(L10NValues.ASPECT_ERROR_INVALIDTYPE,
-                                                new L10NHelpers.UnlocalizedString(ValueTypes.OBJECT_ITEMSTACK.getUnlocalizedName()),
-                                                new L10NHelpers.UnlocalizedString(input.getRight().getRawValue().getValueType().getUnlocalizedName())).localize());
+                                                new L10NHelpers.UnlocalizedString(ValueTypes.OBJECT_ITEMSTACK.getTranslationKey()),
+                                                new L10NHelpers.UnlocalizedString(input.getRight().getRawValue().getValueType().getTranslationKey())).localize());
                                     }
                                     return null;
                                 }
@@ -232,8 +232,8 @@ public class CharsetAspects {
                                         shifter.setShifting(true);
                                     } else {
                                         throw new EvaluationException(new L10NHelpers.UnlocalizedString(L10NValues.ASPECT_ERROR_INVALIDTYPE,
-                                                new L10NHelpers.UnlocalizedString(ValueTypes.OBJECT_FLUIDSTACK.getUnlocalizedName()),
-                                                new L10NHelpers.UnlocalizedString(input.getRight().getRawValue().getValueType().getUnlocalizedName())).localize());
+                                                new L10NHelpers.UnlocalizedString(ValueTypes.OBJECT_FLUIDSTACK.getTranslationKey()),
+                                                new L10NHelpers.UnlocalizedString(input.getRight().getRawValue().getValueType().getTranslationKey())).localize());
                                     }
                                     return null;
                                 }

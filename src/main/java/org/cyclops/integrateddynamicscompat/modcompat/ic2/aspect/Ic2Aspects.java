@@ -37,7 +37,7 @@ public class Ic2Aspects {
                         return new EnergyStorageWrapper(energyStorage);
                     }
                     TileEntityBlock tile = TileHelpers.getSafeTile(pos, TileEntityBlock.class);
-                    if (tile != null && tile.hasComponent(ic2.core.block.comp.Energy.class)) {
+                    if (tile != null && tile.getComponent("energy") != null) {
                         return new EnergyWrapper(tile);
                     }
                     return null;

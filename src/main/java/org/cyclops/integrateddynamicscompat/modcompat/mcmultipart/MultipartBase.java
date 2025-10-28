@@ -83,14 +83,14 @@ public abstract class MultipartBase extends Multipart implements ISlottedPart, I
     public void writeUpdatePacket(PacketBuffer buf) {
         NBTTagCompound tag = new NBTTagCompound();
         writeToNBT(tag);
-        buf.writeNBTTagCompoundToBuffer(tag);
+        buf.writeCompoundTag(tag);
     }
 
     @Override
     public void readUpdatePacket(PacketBuffer buf) {
         super.readUpdatePacket(buf);
         try {
-            readFromNBT(buf.readNBTTagCompoundFromBuffer());
+            readFromNBT(buf.readCompoundTag());
         } catch (IOException e) {
             e.printStackTrace();
         }

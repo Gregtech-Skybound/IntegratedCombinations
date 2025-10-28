@@ -41,4 +41,14 @@ public class DynamicRedstonePart implements IDynamicRedstone {
     public boolean isAllowRedstoneInput() {
         return partCable.isAllowsRedstone();
     }
+
+    @Override
+    public void setLastPulseValue(int value) {
+        partCable.setRedstoneLevel(value);
+    }
+
+    @Override
+    public int getLastPulseValue() {
+        return partCable.getRedstoneLevel();
+    }
 }

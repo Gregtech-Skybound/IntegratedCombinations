@@ -10,7 +10,6 @@ import net.minecraft.world.World;
 import org.cyclops.integrateddynamics.api.block.cable.ICable;
 import org.cyclops.integrateddynamics.block.BlockCable;
 import org.cyclops.integrateddynamics.capability.cable.CableDefault;
-import org.cyclops.integrateddynamics.modcompat.mcmultipart.MultipartBase;
 
 import javax.annotation.Nullable;
 

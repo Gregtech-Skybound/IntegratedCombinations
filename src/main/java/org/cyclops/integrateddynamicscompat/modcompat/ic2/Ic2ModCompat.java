@@ -71,7 +71,7 @@ public class Ic2ModCompat implements IModCompat {
 					.function(OperatorBuilders.FUNCTION_CONTAINERITEM_TO_INT.build(new IOperatorValuePropagator<Pair<IElectricItem, ItemStack>, Integer>() {
 						@Override
 						public Integer getOutput(Pair<IElectricItem, ItemStack> input) throws EvaluationException {
-							return input != null ? (int) ElectricItem.manager.getMaxCharge(input.getRight()) : 0;
+							return input != null ? (int) input.getLeft().getMaxCharge(input.getRight()) : 0;
 						}
 					})).build());
     	}

@@ -49,7 +49,6 @@ import org.cyclops.integrateddynamicscompat.modcompat.tesla.capabilities.TeslaPr
 import org.cyclops.integrateddynamicscompat.modcompat.tesla.capabilities.TeslaProducerEnergyContainerItemCompat;
 import org.cyclops.integrateddynamicscompat.modcompat.thaumcraft.ThaumcraftModCompat;
 import org.cyclops.integrateddynamicscompat.modcompat.top.TopModCompat;
-import org.cyclops.integrateddynamicscompat.modcompat.waila.WailaModCompat;
 
 import java.util.Map;
 
@@ -104,7 +103,6 @@ public class IntegratedDynamicsCompat extends ModBaseVersionable {
         // Mod compats
         //modCompatLoader.addModCompat(new CharsetPipesModCompat());
         //modCompatLoader.addModCompat(new McMultiPartModCompat());
-        modCompatLoader.addModCompat(new WailaModCompat());
         modCompatLoader.addModCompat(new ThaumcraftModCompat());
         modCompatLoader.addModCompat(new JEIModCompat());
         modCompatLoader.addModCompat(new TConstructModCompat());

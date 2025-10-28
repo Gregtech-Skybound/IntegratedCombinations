@@ -54,6 +54,8 @@ import org.cyclops.integrateddynamics.core.helper.CableHelpers;
 import org.cyclops.integrateddynamics.core.helper.NetworkHelpers;
 import org.cyclops.integrateddynamics.core.helper.PartHelpers;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 
@@ -134,7 +136,7 @@ public class PartCable extends MultipartBase implements ITickable {
     }
 
     @Override
-    public IBlockState getExtendedState(IBlockState state, IBlockAccess world, BlockPos pos) {
+    public IBlockState getExtendedState(IBlockState state) {
         if (cachedState != null) {
             return cachedState;
         }
@@ -195,14 +197,14 @@ public class PartCable extends MultipartBase implements ITickable {
 
     protected void addCollisionBoxConditional(AxisAlignedBB mask, List<AxisAlignedBB> list, Entity collidingEntity, EnumFacing side) {
         AxisAlignedBB box = BlockCable.getInstance().getCableBoundingBox(side);
-        if(box.intersectsWith(mask)) {
+        if(box.intersects(mask)) {
             list.add(box);
         }
     }
 
     protected void addCollisionBoxWithPartConditional(AxisAlignedBB mask, List<AxisAlignedBB> list, Entity collidingEntity, EnumFacing side) {
         AxisAlignedBB box = getPart(side).getPartRenderPosition().getSidedCableBoundingBox(side);
-        if(box.intersectsWith(mask)) {
+        if(box.intersects(mask)) {
             list.add(box);
         }
     }
@@ -274,21 +276,22 @@ public class PartCable extends MultipartBase implements ITickable {
     public void onAdded() {
         super.onAdded();
         if(!isAddSilent()) {
-            CableHelpers.onCableAdded(getWorld(), getPos(), null);
+            CableHelpers.onCableAdded(getWorld(), getPos());
             detectPresentParts();
         }
     }
 
     @Override
     public void harvest(EntityPlayer player, PartMOP hit) {
-        CableHelpers.onCableRemoving(getWorld(), getPos(), false);
+        CableHelpers.onCableRemoving(getWorld(), getPos(), false, false);
         super.harvest(player, hit);
     }
 
     @Override
     public void onRemoved() {
         super.onRemoved();
-        CableHelpers.onCableRemoved(getWorld(), getPos());
+        CableHelpers.onCableRemoved(getWorld(), getPos(), new ArrayList<>() {{ add(EnumFacing.DOWN);
+            add(EnumFacing.UP); add(EnumFacing.SOUTH); add(EnumFacing.NORTH); add(EnumFacing.EAST); add(EnumFacing.WEST); }});
     }
 
     @Override
@@ -307,7 +310,7 @@ public class PartCable extends MultipartBase implements ITickable {
         World world = getWorld();
         BlockPos pos = getPos();
         cable.updateConnections();
-        NetworkHelpers.onElementProviderBlockNeighborChange(world, pos, neighborBlock);
+        NetworkHelpers.onElementProviderBlockNeighborChange(world, pos, neighborBlock, null);
     }
 
     @Override

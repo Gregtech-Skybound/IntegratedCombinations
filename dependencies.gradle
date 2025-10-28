@@ -37,6 +37,14 @@
  *
  * For more details, see https://docs.gradle.org/8.4/userguide/java_library_plugin.html#sec:java_library_configurations_graph
  */
+
+repositories {
+    maven {
+        name 'K4 maven'
+        url "http://maven.k-4u.nl/"
+    }
+}
+
 dependencies {
     implementation rfg.deobf('curse.maven:common_capabilites-247007:3053017')
     implementation rfg.deobf('curse.maven:cyclops_core-232758:3159497')
@@ -46,8 +54,21 @@ dependencies {
 
     testCompileOnly("org.projectlombok:lombok:1.18.42")
     testAnnotationProcessor("org.projectlombok:lombok:1.18.42")
+    testImplementation 'junit:junit:4.12'
 
     embed("com.google.re2j:re2j:1.8")
 
-    testImplementation 'junit:junit:4.12'
+    // integration deps
+    compileOnly rfg.deobf('curse.maven:tesla-244651:2487959')
+    compileOnly rfg.deobf('curse.maven:charset-284523:3656492')
+    compileOnly rfg.deobf('curse.maven:forestry-59751:6450115')
+    compileOnly rfg.deobf('curse.maven:ic2-242638:6833054')
+    compileOnly rfg.deobf('curse.maven:immersive_engineering-231951:2974106')
+    compileOnly rfg.deobf('curse.maven:mcmultipart-239431:2321940')
+    compileOnly rfg.deobf('curse.maven:thaumcraft-223628:2629023')
+    compileOnly rfg.deobf("signals:Signals-1.12.2:1.1.0-2:universal")
+    compileOnly rfg.deobf("curse.maven:refined_storage-243076:2940914")
+    compileOnly rfg.deobf("curse.maven:wawla-224712:2916368")
+    compileOnly rfg.deobf("curse.maven:tconstruct-74072:2902483")
+    compileOnly 'curse.maven:crafttweaker-239197:6929088'
 }

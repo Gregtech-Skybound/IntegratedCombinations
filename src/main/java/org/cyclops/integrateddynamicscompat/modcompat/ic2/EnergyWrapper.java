@@ -12,7 +12,7 @@ public class EnergyWrapper implements IEnergyWrapper {
     private final Energy energy;
 
     public EnergyWrapper(TileEntityBlock tile) {
-        this.energy = tile.getComponent(Energy.class);
+        this.energy = (Energy) tile.getComponent("energy");
     }
 
     @Override

@@ -53,10 +53,12 @@ public class PartContainerPartCable extends PartContainerDefault {
         MultipartHelper.addPart(getWorld(), getPos(), partPart);
     }
 
+
+
     @Override
-    public IPartType removePart(EnumFacing side, EntityPlayer player, boolean dropMainElement) {
+    public IPartType removePart(EnumFacing side, EntityPlayer player, boolean dropMainElement, boolean saveState) {
         PartPartType partPartType = getPartPart(side);
-        IPartType removed = super.removePart(side, player, dropMainElement);
+        IPartType removed = super.removePart(side, player, dropMainElement, saveState);
         if (removed != null && partPartType != null) {
             partCable.getContainer().removePart(partPartType);
         }
