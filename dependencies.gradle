@@ -68,7 +68,7 @@ dependencies {
     compileOnly rfg.deobf('curse.maven:thaumcraft-223628:2629023')
     compileOnly rfg.deobf("signals:Signals-1.12.2:1.1.0-2:universal")
     compileOnly rfg.deobf("curse.maven:refined_storage-243076:2940914")
-    compileOnly rfg.deobf("curse.maven:wawla-224712:2916368")
+    compileOnly rfg.deobf("curse.maven:hwyla-253449:2568751")
     compileOnly rfg.deobf("curse.maven:tconstruct-74072:2902483")
     compileOnly 'curse.maven:crafttweaker-239197:6929088'
 }
