@@ -59,7 +59,7 @@ public class PartTypeInterfaceItem extends PartTypeInterfacePositionedAddon<IIte
 
         @Override
         public int getSlots() {
-            if (!isNetworkAndPositionValid()) {
+            if (!isNetworkAndPositionValid() || !GeneralConfig.allowDirectInteractionInterfaces) {
                 return 0;
             }
             disablePosition();
@@ -70,7 +70,7 @@ public class PartTypeInterfaceItem extends PartTypeInterfacePositionedAddon<IIte
 
         @Override
         public ItemStack getStackInSlot(int slot) {
-            if (!isNetworkAndPositionValid()) {
+            if (!isNetworkAndPositionValid() || !GeneralConfig.allowDirectInteractionInterfaces) {
                 return ItemStack.EMPTY;
             }
             disablePosition();
@@ -81,7 +81,7 @@ public class PartTypeInterfaceItem extends PartTypeInterfacePositionedAddon<IIte
 
         @Override
         public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
-            if (!isNetworkAndPositionValid()) {
+            if (!isNetworkAndPositionValid() || !GeneralConfig.allowDirectInteractionInterfaces) {
                 return stack;
             }
             disablePosition();
@@ -92,7 +92,7 @@ public class PartTypeInterfaceItem extends PartTypeInterfacePositionedAddon<IIte
 
         @Override
         public ItemStack extractItem(int slot, int amount, boolean simulate) {
-            if (!isNetworkAndPositionValid()) {
+            if (!isNetworkAndPositionValid() || !GeneralConfig.allowDirectInteractionInterfaces) {
                 return ItemStack.EMPTY;
             }
             disablePosition();
@@ -103,7 +103,7 @@ public class PartTypeInterfaceItem extends PartTypeInterfacePositionedAddon<IIte
 
         @Override
         public int getSlotLimit(int slot) {
-            if (!isNetworkAndPositionValid()) {
+            if (!isNetworkAndPositionValid() || !GeneralConfig.allowDirectInteractionInterfaces) {
                 return 0;
             }
             disablePosition();

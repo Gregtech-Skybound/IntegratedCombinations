@@ -57,7 +57,7 @@ public class PartTypeInterfaceEnergy extends PartTypeInterfacePositionedAddon<IE
 
         @Override
         public int receiveEnergy(int maxReceive, boolean simulate) {
-            if (!isNetworkAndPositionValid()) {
+            if (!isNetworkAndPositionValid() || !GeneralConfig.allowDirectInteractionInterfaces) {
                 return 0;
             }
             disablePosition();
@@ -68,7 +68,7 @@ public class PartTypeInterfaceEnergy extends PartTypeInterfacePositionedAddon<IE
 
         @Override
         public int extractEnergy(int maxExtract, boolean simulate) {
-            if (!isNetworkAndPositionValid()) {
+            if (!isNetworkAndPositionValid() || !GeneralConfig.allowDirectInteractionInterfaces) {
                 return 0;
             }
             disablePosition();
@@ -79,7 +79,7 @@ public class PartTypeInterfaceEnergy extends PartTypeInterfacePositionedAddon<IE
 
         @Override
         public int getEnergyStored() {
-            if (!isNetworkAndPositionValid()) {
+            if (!isNetworkAndPositionValid() || !GeneralConfig.allowDirectInteractionInterfaces) {
                 return 0;
             }
             disablePosition();
@@ -90,7 +90,7 @@ public class PartTypeInterfaceEnergy extends PartTypeInterfacePositionedAddon<IE
 
         @Override
         public int getMaxEnergyStored() {
-            if (!isNetworkAndPositionValid()) {
+            if (!isNetworkAndPositionValid() || !GeneralConfig.allowDirectInteractionInterfaces) {
                 return 0;
             }
             disablePosition();
@@ -101,7 +101,7 @@ public class PartTypeInterfaceEnergy extends PartTypeInterfacePositionedAddon<IE
 
         @Override
         public boolean canExtract() {
-            if (!isNetworkAndPositionValid()) {
+            if (!isNetworkAndPositionValid() || !GeneralConfig.allowDirectInteractionInterfaces) {
                 return false;
             }
             disablePosition();
@@ -112,7 +112,7 @@ public class PartTypeInterfaceEnergy extends PartTypeInterfacePositionedAddon<IE
 
         @Override
         public boolean canReceive() {
-            if (!isNetworkAndPositionValid()) {
+            if (!isNetworkAndPositionValid() || !GeneralConfig.allowDirectInteractionInterfaces) {
                 return false;
             }
             disablePosition();

@@ -54,7 +54,7 @@ public class PartTypeInterfaceFluid extends PartTypeInterfacePositionedAddon<IFl
 
         @Override
         public IFluidTankProperties[] getTankProperties() {
-            if (!isNetworkAndPositionValid()) {
+            if (!isNetworkAndPositionValid() || !GeneralConfig.allowDirectInteractionInterfaces) {
                 return new IFluidTankProperties[0];
             }
             disablePosition();
@@ -65,7 +65,7 @@ public class PartTypeInterfaceFluid extends PartTypeInterfacePositionedAddon<IFl
 
         @Override
         public int fill(FluidStack resource, boolean doFill) {
-            if (!isNetworkAndPositionValid()) {
+            if (!isNetworkAndPositionValid() || !GeneralConfig.allowDirectInteractionInterfaces) {
                 return 0;
             }
             disablePosition();
@@ -77,7 +77,7 @@ public class PartTypeInterfaceFluid extends PartTypeInterfacePositionedAddon<IFl
         @Nullable
         @Override
         public FluidStack drain(FluidStack resource, boolean doDrain) {
-            if (!isNetworkAndPositionValid()) {
+            if (!isNetworkAndPositionValid() || !GeneralConfig.allowDirectInteractionInterfaces) {
                 return null;
             }
             disablePosition();
@@ -89,7 +89,7 @@ public class PartTypeInterfaceFluid extends PartTypeInterfacePositionedAddon<IFl
         @Nullable
         @Override
         public FluidStack drain(int maxDrain, boolean doDrain) {
-            if (!isNetworkAndPositionValid()) {
+            if (!isNetworkAndPositionValid() || !GeneralConfig.allowDirectInteractionInterfaces) {
                 return null;
             }
             disablePosition();

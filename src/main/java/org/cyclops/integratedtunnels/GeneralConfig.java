@@ -70,6 +70,8 @@ public class GeneralConfig extends DummyConfig {
     @ConfigurableProperty(category = ConfigurableTypeCategory.CORE, comment = "The maximum network item transfer rate.", isCommandable = true, minimalValue = 0, maximalValue = 256)
     public static int itemRateLimit = 128;
 
+    @ConfigurableProperty(category = ConfigurableTypeCategory.CORE, comment = "If it should be allowed that other TileEntities, e.g. Hoppers, can insert to or extract from (fluid/energy/item) interfaces directly. NOTE: Doing so can produce alot of lag!", isCommandable = true)
+    public static boolean allowDirectInteractionInterfaces = true;
 
     /**
      * If particles should be shown and sounds should be played when tunnels are interacting with the world.
