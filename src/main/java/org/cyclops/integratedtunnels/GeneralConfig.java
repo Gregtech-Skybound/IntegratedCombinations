@@ -65,6 +65,13 @@ public class GeneralConfig extends DummyConfig {
     public static int fluidRateLimit = Integer.MAX_VALUE;
 
     /**
+     * The maximum network item transfer rate.
+     */
+    @ConfigurableProperty(category = ConfigurableTypeCategory.CORE, comment = "The maximum network item transfer rate.", isCommandable = true, minimalValue = 0, maximalValue = 256)
+    public static int itemRateLimit = 128;
+
+
+    /**
      * If particles should be shown and sounds should be played when tunnels are interacting with the world.
      */
     @ConfigurableProperty(category = ConfigurableTypeCategory.CORE, comment = "If particles should be shown and sounds should be played when tunnels are interacting with the world.", isCommandable = true)
