@@ -148,9 +148,18 @@ public class IngredientObserver<T, M> {
     /**
      * @return If an observation job was successfully started if it was needed.
      */
-    protected boolean observe() {
+    protected boolean observe(boolean forceSync) {
         if (!this.changeObservers.isEmpty()) {
-            if (GeneralConfig.ingredientNetworkObserverEnableMultithreading) {
+            // If we forcefully observe sync, make sure that no async observers are still running
+            if (forceSync && GeneralConfig.ingredientNetworkObserverEnableMultithreading
+                    && this.lastObserverBarrier != null && !this.lastObserverBarrier.isDone()) {
+                try {
+                    this.lastObserverBarrier.get();
+                } catch (InterruptedException | ExecutionException e) {
+                    // Ignore errors
+                }
+            }
+            if (GeneralConfig.ingredientNetworkObserverEnableMultithreading && !forceSync) {
                 // If we still have an uncompleted job from the previous tick, wait for it to finish first!
                 if (this.lastObserverBarrier != null) {
                     try {

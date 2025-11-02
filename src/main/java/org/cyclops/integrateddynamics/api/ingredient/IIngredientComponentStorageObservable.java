@@ -69,6 +69,12 @@ public interface IIngredientComponentStorageObservable<T, M> {
      */
     public boolean isObservationForcedPending(int channel);
 
+
+    /**
+     * Manually run observer synchronously (even if async is allowed), if it should observe.
+     */
+    public void runObserverSync();
+
     /**
      * Get the last indexed storage at the given channel.
      * @param channel A channel id.
