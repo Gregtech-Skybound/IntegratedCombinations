@@ -8,6 +8,8 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntLinkedOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import org.cyclops.commoncapabilities.api.capability.inventorystate.IInventoryState;
 import org.cyclops.cyclopscore.helper.TileHelpers;
@@ -23,10 +25,7 @@ import org.cyclops.integrateddynamics.api.part.PrioritizedPartPos;
 import org.cyclops.integrateddynamics.core.network.diagnostics.NetworkDiagnostics;
 
 import javax.annotation.Nullable;
-import java.util.ConcurrentModificationException;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -54,6 +53,8 @@ public class IngredientObserver<T, M> {
     private final Int2ObjectMap<List<PrioritizedPartPos>> lastRemoved;
     private final Map<PartPos, Integer> lastInventoryStates;
     private Future<?> lastObserverBarrier;
+    private boolean runningObserverSync;
+    private boolean initialObservation;
 
     public IngredientObserver(IPositionedAddonsNetworkIngredients<T, M> network) {
         this.network = network;
@@ -66,6 +67,8 @@ public class IngredientObserver<T, M> {
         this.lastInventoryStates = Maps.newHashMap();
 
         this.lastObserverBarrier = null;
+        this.runningObserverSync = false;
+        this.initialObservation = true;
     }
 
     public IPositionedAddonsNetworkIngredients<T, M> getNetwork() {
@@ -153,15 +156,22 @@ public class IngredientObserver<T, M> {
             // If we forcefully observe sync, make sure that no async observers are still running
             if (forceSync && GeneralConfig.ingredientNetworkObserverEnableMultithreading
                     && this.lastObserverBarrier != null && !this.lastObserverBarrier.isDone()) {
-                try {
-                    this.lastObserverBarrier.get();
-                } catch (InterruptedException | ExecutionException e) {
-                    // Ignore errors
-                }
+
+                // This loop is necessary because observation tasks may require chunk lookups,
+                // which are only allowed on the main thread, and are therefore deferred as task on the main thread.
+                // This loop makes sure that these tasks are handled.
+                // Without this loop, we would run into a deadlock where the main- and worker-thread would both halt.
+                do {
+                    MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
+                    for (WorldServer serverworld : server.worlds) {
+                        serverworld.getChunkProvider().tick();
+                    }
+                    Thread.yield();
+                } while (!this.lastObserverBarrier.isDone());
             }
             if (GeneralConfig.ingredientNetworkObserverEnableMultithreading && !forceSync) {
-                // If we still have an uncompleted job from the previous tick, wait for it to finish first!
-                if (this.lastObserverBarrier != null) {
+                // If we still have an uncompleted job (sync or async) from the previous tick, wait for it to finish first!
+                if ((this.lastObserverBarrier != null && !this.lastObserverBarrier.isDone()) || this.runningObserverSync) {
                     try {
                         this.lastObserverBarrier.get(1, TimeUnit.SECONDS);
                     } catch (TimeoutException e) {
@@ -182,12 +192,21 @@ public class IngredientObserver<T, M> {
                     for (int channel : getChannels()) {
                         observe(channel);
                     }
+                    this.initialObservation = false;
                 });
             } else {
+                // If we have an uncompleted sync observer, don't start a new one yet!
+                if (this.runningObserverSync) {
+                    return false;
+                }
+
+                this.runningObserverSync = true;
                 for (int channel : getChannels()) {
                     observe(channel);
                 }
+                this.runningObserverSync = false;
             }
+            this.initialObservation = false;
         }
         return true;
     }
@@ -278,17 +297,18 @@ public class IngredientObserver<T, M> {
                     }
 
                     // Emit event of diff
-                    IngredientCollectionDiff<T, M> diff = diffManager.onChange(getNetwork().getRawInstances(partPos.getPartPos()));
+                    Iterator<T> instances = getNetwork().getRawInstances(partPos.getPartPos());
+                    IngredientCollectionDiff<T, M> diff = diffManager.onChange(instances);
                     boolean hasChanges = false;
                     if (diff.hasAdditions()) {
                         hasChanges = true;
                         this.emitEvent(new IIngredientComponentStorageObservable.StorageChangeEvent<>(channel, partPos,
-                                IIngredientComponentStorageObservable.Change.ADDITION, false, diff.getAdditions()));
+                                IIngredientComponentStorageObservable.Change.ADDITION, false, diff.getAdditions(), this.initialObservation));
                     }
                     if (diff.hasDeletions()) {
                         hasChanges = true;
                         this.emitEvent(new IIngredientComponentStorageObservable.StorageChangeEvent<>(channel, partPos,
-                                IIngredientComponentStorageObservable.Change.DELETION, diff.isCompletelyEmpty(), diff.getDeletions()));
+                                IIngredientComponentStorageObservable.Change.DELETION, diff.isCompletelyEmpty(), diff.getDeletions(), this.initialObservation));
                     }
 
                     // Update the next tick value

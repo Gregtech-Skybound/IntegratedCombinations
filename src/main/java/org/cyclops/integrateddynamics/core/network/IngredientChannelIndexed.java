@@ -62,4 +62,8 @@ public class IngredientChannelIndexed<T, M> extends IngredientChannelAdapter<T, 
     protected boolean canExtract(T extractedSimulated) {
         return index.getQuantity(extractedSimulated) >= getComponent().getMatcher().getQuantity(extractedSimulated);
     }
+
+    public IIngredientPositionsIndex<T, M> getIndex() {
+        return this.index;
+    }
 }

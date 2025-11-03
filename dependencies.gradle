@@ -46,7 +46,7 @@ repositories {
 }
 
 dependencies {
-    implementation rfg.deobf('curse.maven:common_capabilites-247007:3053017')
+    implementation rfg.deobf(files('libs/commoncapabilities-1.12.2-3.0.0-dev.jar'))
     implementation rfg.deobf('curse.maven:cyclops_core-232758:3159497')
 
     compileOnly("org.projectlombok:lombok:1.18.42")

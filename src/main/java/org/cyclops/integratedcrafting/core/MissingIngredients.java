@@ -55,6 +55,7 @@ public class MissingIngredients<T, M> {
                     NBTTagCompound alternativeTag = new NBTTagCompound();
                     alternativeTag.setTag("requestedPrototype", IPrototypedIngredient.serialize(alternative.getRequestedPrototype()));
                     alternativeTag.setLong("quantityMissing", alternative.getQuantityMissing());
+                    alternativeTag.setBoolean("inputReusable", element.isInputReusable()); // Hack, should actually be one level higher, but this is for backwards-compat
                     elementsTag.appendTag(alternativeTag);
                 }
                 missingIngredientsTag.appendTag(elementsTag);
@@ -85,13 +86,15 @@ public class MissingIngredients<T, M> {
             for (int i = 0; i < missingIngredientsTag.tagCount(); i++) {
                 NBTTagList elementsTag = (NBTTagList) missingIngredientsTag.get(i);
                 List<MissingIngredients.PrototypedWithRequested<?, ?>> alternatives = Lists.newArrayList();
+                boolean inputReusable = false;
                 for (int j = 0; j < elementsTag.tagCount(); j++) {
                     NBTTagCompound alternativeTag = elementsTag.getCompoundTagAt(j);
                     IPrototypedIngredient<?, ?> requestedPrototype = IPrototypedIngredient.deserialize(alternativeTag.getCompoundTag("requestedPrototype"));
                     long quantityMissing = alternativeTag.getLong("quantityMissing");
+                    inputReusable = alternativeTag.getBoolean("inputReusable");
                     alternatives.add(new PrototypedWithRequested<>(requestedPrototype, quantityMissing));
                 }
-                elements.add(new Element(alternatives));
+                elements.add(new Element(alternatives, inputReusable));
             }
 
             MissingIngredients<?, ?> missingIngredients = new MissingIngredients(elements);
@@ -108,23 +111,38 @@ public class MissingIngredients<T, M> {
     public static class Element<T, M> {
 
         private final List<MissingIngredients.PrototypedWithRequested<T, M>> alternatives;
+        private final boolean inputReusable;
 
-        public Element(List<MissingIngredients.PrototypedWithRequested<T, M>> alternatives) {
+        public Element(List<MissingIngredients.PrototypedWithRequested<T, M>> alternatives, boolean inputReusable) {
             this.alternatives = alternatives;
+            this.inputReusable = inputReusable;
         }
 
         public List<PrototypedWithRequested<T, M>> getAlternatives() {
             return alternatives;
         }
 
+        public boolean isInputReusable() {
+            return inputReusable;
+        }
+
         @Override
         public boolean equals(Object obj) {
-            return obj instanceof Element && this.getAlternatives().equals(((Element) obj).getAlternatives());
+            return obj instanceof Element
+                    && this.getAlternatives().equals(((Element) obj).getAlternatives())
+                    && this.isInputReusable() == ((Element) obj).isInputReusable();
+        }
+
+        @Override
+        public int hashCode() {
+            int result = alternatives.hashCode();
+            result = 31 * result + Boolean.hashCode(inputReusable);
+            return result;
         }
 
         @Override
         public String toString() {
-            return getAlternatives().toString();
+            return getAlternatives().toString() + "::" + isInputReusable();
         }
     }
 
@@ -157,6 +175,13 @@ public class MissingIngredients<T, M> {
             return obj instanceof PrototypedWithRequested
                     && this.getRequestedPrototype().equals(((PrototypedWithRequested) obj).getRequestedPrototype())
                     && this.getQuantityMissing() == ((PrototypedWithRequested) obj).getQuantityMissing();
+        }
+
+        @Override
+        public int hashCode() {
+            int result = requestedPrototype.hashCode();
+            result = 31 * result + Long.hashCode(quantityMissing);
+            return result;
         }
 
         @Override
