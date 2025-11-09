@@ -18,6 +18,7 @@ import org.cyclops.integratedterminals.api.terminalstorage.crafting.ITerminalCra
 import org.cyclops.integratedterminals.client.gui.container.component.GuiCraftingPlan;
 import org.cyclops.integratedterminals.core.client.gui.CraftingOptionGuiData;
 import org.cyclops.integratedterminals.inventory.container.ContainerTerminalStorageCraftingPlan;
+import org.cyclops.integratedterminals.network.packet.PortableTerminalStorageIngredientOpenPacket;
 import org.cyclops.integratedterminals.network.packet.TerminalStorageIngredientOpenPacket;
 import org.lwjgl.input.Keyboard;
 
@@ -31,6 +32,7 @@ import java.io.IOException;
 public class GuiTerminalStorageCraftingPlan extends GuiContainerExtended {
 
     private final CraftingOptionGuiData<?, ?> craftingOptionGuiData;
+    private final boolean isItem;
 
     @Nullable
     private GuiCraftingPlan guiCraftingPlan;
@@ -42,6 +44,14 @@ public class GuiTerminalStorageCraftingPlan extends GuiContainerExtended {
         super(new ContainerTerminalStorageCraftingPlan(player, target, partContainer, partType, craftingOptionGuiData));
 
         this.craftingOptionGuiData = craftingOptionGuiData;
+        this.isItem = false;
+    }
+
+    public GuiTerminalStorageCraftingPlan(EntityPlayer player, int itemIndex, CraftingOptionGuiData craftingOptionGuiData) {
+        super(new ContainerTerminalStorageCraftingPlan(player, itemIndex, craftingOptionGuiData));
+
+        this.craftingOptionGuiData = craftingOptionGuiData;
+        this.isItem = true;
     }
 
     @Override
@@ -99,8 +109,14 @@ public class GuiTerminalStorageCraftingPlan extends GuiContainerExtended {
     }
 
     private void returnToTerminalStorage() {
-        TerminalStorageIngredientOpenPacket.send(craftingOptionGuiData.getPos(), craftingOptionGuiData.getSide(),
-                craftingOptionGuiData.getTabName(), craftingOptionGuiData.getChannel());
+        if (this.isItem) {
+            PortableTerminalStorageIngredientOpenPacket.send(craftingOptionGuiData.getItemIndex(),
+                    craftingOptionGuiData.getTabName(), craftingOptionGuiData.getChannel());
+        } else {
+            TerminalStorageIngredientOpenPacket.send(craftingOptionGuiData.getPos(), craftingOptionGuiData.getSide(),
+                    craftingOptionGuiData.getTabName(), craftingOptionGuiData.getChannel());
+        }
+
     }
 
     @Override

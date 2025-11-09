@@ -107,6 +107,9 @@ public class GuiTerminalStorage extends GuiContainerExtended {
     public GuiTerminalStorage(EntityPlayer player, int itemIndex) {
         super(new ContainerTerminalStorage(player, itemIndex));
     }
+    public GuiTerminalStorage(EntityPlayer player, int itemIndex, ContainerTerminalStorage.InitTabData initTabData) {
+        super(new ContainerTerminalStorage(player, itemIndex, initTabData));
+    }
 
     @Override
     public void initGui() {

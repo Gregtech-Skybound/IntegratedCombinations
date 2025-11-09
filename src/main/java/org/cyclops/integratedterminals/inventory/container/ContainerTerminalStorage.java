@@ -3,6 +3,7 @@ package org.cyclops.integratedterminals.inventory.container;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import lombok.Getter;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
@@ -40,6 +41,7 @@ import java.util.stream.Collectors;
 /**
  * @author rubensworks
  */
+@Getter
 public class ContainerTerminalStorage extends ExtendedInventoryContainer {
 
     private final World world;
@@ -60,10 +62,27 @@ public class ContainerTerminalStorage extends ExtendedInventoryContainer {
     private String channelAllLabel;
 
     private final int itemIndex;
+    private final boolean isItem;
 
     private static final TerminalStorageState GLOBAL_PLAYER_STATE = new TerminalStorageState();
 
+    /**
+     * Make a new instance.
+     * @param player The player.
+     * @param itemIndex The index where the item is located.
+     * @param initTabData The tab and channel to select.
+     */
+    public ContainerTerminalStorage(EntityPlayer player, int itemIndex, ContainerTerminalStorage.InitTabData initTabData) {
+        this(player, itemIndex);
+        setSelectedTab(initTabData.getTabName());
+        setSelectedChannel(initTabData.getChannel());
+    }
 
+    /**
+     * Make a new instance.
+     * @param player The player.
+     * @param itemIndex The index where the item is located.
+     */
     public ContainerTerminalStorage(EntityPlayer player, int itemIndex) {
         super(player.inventory, ItemTerminalStoragePortable.getInstance());
 
@@ -81,6 +100,7 @@ public class ContainerTerminalStorage extends ExtendedInventoryContainer {
         this.selectedChannelValueId = getNextValueId();
         this.serverTabsInitialized = false;
         this.itemIndex = itemIndex;
+        this.isItem = true;
 
         addPlayerInventory(player.inventory, 31, 143);
 
@@ -157,6 +177,7 @@ public class ContainerTerminalStorage extends ExtendedInventoryContainer {
         this.selectedChannelValueId = getNextValueId();
         this.serverTabsInitialized = false;
         this.itemIndex = 0;
+        this.isItem = false;
 
         addPlayerInventory(player.inventory, 31, 143);
 
@@ -225,15 +246,11 @@ public class ContainerTerminalStorage extends ExtendedInventoryContainer {
     }
 
     public ItemStack getItemStack(EntityPlayer player) {
-        return InventoryHelpers.getItemFromIndex(player, itemIndex);
+        return InventoryHelpers.getItemFromIndex(player, itemIndex, ItemTerminalStoragePortable.getInstance());
     }
 
     public TerminalStorageState getGuiState() {
         return GLOBAL_PLAYER_STATE;
-    }
-
-    public int getNextValueId() {
-        return super.getNextValueId();
     }
 
     @Override
@@ -274,14 +291,6 @@ public class ContainerTerminalStorage extends ExtendedInventoryContainer {
         }
     }
 
-    public PartTarget getTarget() {
-        return target;
-    }
-
-    public PartTypeTerminalStorage.State getPartState() {
-        return partState;
-    }
-
     public PartTypeTerminalStorage getPartType() {
         return (PartTypeTerminalStorage) partType;
     }
@@ -293,7 +302,7 @@ public class ContainerTerminalStorage extends ExtendedInventoryContainer {
 
     @Override
     public boolean canInteractWith(EntityPlayer playerIn) {
-        return this.partType == null ? this.getItemStack(player).getItem() instanceof ItemTerminalStoragePortable : PartHelpers.canInteractWith(getTarget(), player, this.partContainer);
+        return this.isItem ? this.getItemStack(player).getItem() instanceof ItemTerminalStoragePortable : PartHelpers.canInteractWith(getTarget(), player, this.partContainer);
     }
 
     public List<Triple<Slot, Integer, Integer>> getTabSlots(String tabName) {
@@ -388,12 +397,9 @@ public class ContainerTerminalStorage extends ExtendedInventoryContainer {
         return tabs;
     }
 
-    public Map<String, ITerminalStorageTabServer> getTabsServer() {
-        return tabsServer;
-    }
-
-    public List<String> getChannelStrings() {
-        return channelStrings;
+    @Override
+    public int getNextValueId() {
+        return super.getNextValueId();
     }
 
     public void refreshChannelStrings() {
@@ -408,7 +414,7 @@ public class ContainerTerminalStorage extends ExtendedInventoryContainer {
     }
 
     public INetwork getNetwork() {
-        return this.partType == null ? ItemTerminalStoragePortable.getNetworkFromItem(InventoryHelpers.getItemFromIndex(player, itemIndex)) : NetworkHelpers.getNetwork(this.getTarget().getCenter());
+        return this.isItem ? ItemTerminalStoragePortable.getNetworkFromItem(InventoryHelpers.getItemFromIndex(player, itemIndex, ItemTerminalStoragePortable.getInstance())) : NetworkHelpers.getNetwork(this.getTarget().getCenter());
     }
 
     public static class InitTabData {

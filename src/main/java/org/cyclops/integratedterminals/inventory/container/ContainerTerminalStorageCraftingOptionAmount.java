@@ -20,6 +20,29 @@ public class ContainerTerminalStorageCraftingOptionAmount extends ExtendedInvent
     private final IPartContainer partContainer;
     private final IPartType partType;
     private final CraftingOptionGuiData craftingOptionGuiData;
+    private final int itemIndex;
+    private final boolean isItem;
+
+    /**
+     * Make a new instance.
+     * @param player The player.
+     * @param itemIndex The Index where the item is located.
+     * @param craftingOptionGuiData The job data.
+     */
+    public ContainerTerminalStorageCraftingOptionAmount(final EntityPlayer player, int itemIndex,
+                                                        CraftingOptionGuiData craftingOptionGuiData) {
+        super(player.inventory, GuiProviders.GUI_TERMINAL_STORAGE_CRAFTNG_OPTION_AMOUNT_ITEM);
+
+        addPlayerInventory(player.inventory, 9, 80);
+
+        this.world = player.world;
+        this.target = null;
+        this.partContainer = null;
+        this.partType = null;
+        this.craftingOptionGuiData = craftingOptionGuiData;
+        this.itemIndex = itemIndex;
+        this.isItem = true;
+    }
 
     /**
      * Make a new instance.
@@ -32,7 +55,7 @@ public class ContainerTerminalStorageCraftingOptionAmount extends ExtendedInvent
     public ContainerTerminalStorageCraftingOptionAmount(final EntityPlayer player, PartTarget target,
                                                         IPartContainer partContainer, IPartType partType,
                                                         CraftingOptionGuiData craftingOptionGuiData) {
-        super(player.inventory, GuiProviders.GUI_TERMINAL_STORAGE_CRAFTNG_OPTION_AMOUNT);
+        super(player.inventory, GuiProviders.GUI_TERMINAL_STORAGE_CRAFTNG_OPTION_AMOUNT_ITEM);
 
         addPlayerInventory(player.inventory, 9, 80);
 
@@ -41,6 +64,8 @@ public class ContainerTerminalStorageCraftingOptionAmount extends ExtendedInvent
         this.partContainer = partContainer;
         this.partType = partType;
         this.craftingOptionGuiData = craftingOptionGuiData;
+        this.itemIndex = -1;
+        this.isItem = false;
     }
 
     @Override

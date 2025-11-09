@@ -145,7 +145,7 @@ public class TerminalStorageTabIngredientComponentCommon<T, M> implements ITermi
                         this.variables.add(variable);
                     }
 
-                    if (partState != null) {
+                    if (!containerTerminalStorage.isItem()) {
                         try {
                             IPartNetwork partNetwork = NetworkHelpers.getPartNetwork(network);
                             MinecraftForge.EVENT_BUS.post(new PartVariableDrivenVariableContentsUpdatedEvent<>(network,

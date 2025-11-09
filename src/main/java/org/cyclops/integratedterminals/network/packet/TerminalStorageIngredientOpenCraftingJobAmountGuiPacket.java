@@ -27,11 +27,17 @@ public class TerminalStorageIngredientOpenCraftingJobAmountGuiPacket<T, M> exten
     @Override
     public void actionServer(World world, EntityPlayerMP player) {
         CraftingOptionGuiData<T, M> data = getCraftingOptionData();
-        IntegratedTerminals._instance.getGuiHandler().setTemporaryData(ExtendedGuiHandler.CRAFTING_OPTION,
-                Pair.of(data.getSide(), data)); // Pass the side as extra data to the gui
-        BlockPos cPos = data.getPos();
-        player.openGui(IntegratedTerminals._instance, GuiProviders.ID_GUI_TERMINAL_STORAGE_CRAFTNG_OPTION_AMOUNT,
-                world, cPos.getX(), cPos.getY(), cPos.getZ());
+        if (!data.isItem()) {
+            IntegratedTerminals._instance.getGuiHandler().setTemporaryData(ExtendedGuiHandler.CRAFTING_OPTION,
+                    Pair.of(data.getSide(), data)); // Pass the side as extra data to the gui
+            BlockPos cPos = data.getPos();
+            player.openGui(IntegratedTerminals._instance, GuiProviders.ID_GUI_TERMINAL_STORAGE_CRAFTNG_OPTION_AMOUNT,
+                    world, cPos.getX(), cPos.getY(), cPos.getZ());
+        } else {
+            IntegratedTerminals._instance.getGuiHandler().setTemporaryData(ExtendedGuiHandler.CRAFTING_OPTION_ITEM,
+                    Pair.of(data.getItemIndex(), data)); // Pass the itemIndex as extra data to the gui
+            player.openGui(IntegratedTerminals._instance, GuiProviders.ID_GUI_TERMINAL_STORAGE_CRAFTNG_OPTION_AMOUNT_ITEM,
+                    player.world, player.getPosition().getX(), player.getPosition().getY(), player.getPosition().getZ());
+        }
     }
-
 }

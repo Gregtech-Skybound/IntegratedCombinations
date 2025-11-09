@@ -23,6 +23,7 @@ import net.minecraftforge.common.util.Constants;
 import org.cyclops.cyclopscore.config.extendedconfig.ExtendedConfig;
 import org.cyclops.cyclopscore.config.extendedconfig.ItemConfig;
 import org.cyclops.cyclopscore.helper.InventoryHelpers;
+import org.cyclops.cyclopscore.helper.ItemStackHelpers;
 import org.cyclops.cyclopscore.helper.MinecraftHelpers;
 import org.cyclops.cyclopscore.item.ItemGui;
 import org.cyclops.integrateddynamics.api.network.INetwork;
@@ -55,7 +56,7 @@ public class ItemTerminalStoragePortable extends ItemGui {
         if (world.isRemote) {
             super.openGuiForItemIndex(world, player, itemIndex, hand);
         } else {
-            ItemStack itemStack = InventoryHelpers.getItemFromIndex(player, itemIndex);
+            ItemStack itemStack = InventoryHelpers.getItemFromIndex(player, itemIndex, this);
 
             int groupId = getGroupId(itemStack);
             if (groupId >= 0) {

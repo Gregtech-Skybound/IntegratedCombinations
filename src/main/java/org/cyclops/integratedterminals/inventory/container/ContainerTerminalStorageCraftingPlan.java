@@ -5,6 +5,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.tuple.Pair;
+import org.cyclops.cyclopscore.helper.InventoryHelpers;
 import org.cyclops.cyclopscore.inventory.container.ExtendedInventoryContainer;
 import org.cyclops.integrateddynamics.api.network.INetwork;
 import org.cyclops.integrateddynamics.api.part.IPartContainer;
@@ -19,6 +20,7 @@ import org.cyclops.integratedterminals.api.terminalstorage.crafting.ITerminalCra
 import org.cyclops.integratedterminals.core.client.gui.CraftingOptionGuiData;
 import org.cyclops.integratedterminals.core.client.gui.ExtendedGuiHandler;
 import org.cyclops.integratedterminals.core.terminalstorage.crafting.HandlerWrappedTerminalCraftingOption;
+import org.cyclops.integratedterminals.items.ItemTerminalStoragePortable;
 import org.cyclops.integratedterminals.proxy.guiprovider.GuiProviders;
 
 import java.util.concurrent.ExecutorService;
@@ -39,9 +41,34 @@ public class ContainerTerminalStorageCraftingPlan extends ExtendedInventoryConta
     private final IPartType partType;
     private final CraftingOptionGuiData craftingOptionGuiData;
     private final int craftingPlanNotifierId;
+    private final int itemIndex;
+    private final boolean isItem;
 
     private boolean calculatedCraftingPlan;
     private ITerminalCraftingPlan craftingPlan;
+
+    /**
+     * Make a new instance.
+     * @param player The player.
+     * @param itemIndex The index where the item is located.
+     * @param craftingOptionGuiData The job data.
+     */
+    public ContainerTerminalStorageCraftingPlan(final EntityPlayer player, int itemIndex,
+                                                CraftingOptionGuiData craftingOptionGuiData) {
+        super(player.inventory, GuiProviders.GUI_TERMINAL_STORAGE_CRAFTNG_PLAN_ITEM);
+
+        this.world = player.world;
+        this.target = null;
+        this.partContainer = null;
+        this.partType = null;
+        this.craftingOptionGuiData = craftingOptionGuiData;
+        this.itemIndex = itemIndex;
+        this.isItem = true;
+
+        this.craftingPlanNotifierId = getNextValueId();
+
+        putButtonAction(BUTTON_START, (buttonId, container) -> startCraftingJob());
+    }
 
     /**
      * Make a new instance.
@@ -61,6 +88,8 @@ public class ContainerTerminalStorageCraftingPlan extends ExtendedInventoryConta
         this.partContainer = partContainer;
         this.partType = partType;
         this.craftingOptionGuiData = craftingOptionGuiData;
+        this.itemIndex = -1;
+        this.isItem = false;
 
         this.craftingPlanNotifierId = getNextValueId();
 
@@ -92,7 +121,12 @@ public class ContainerTerminalStorageCraftingPlan extends ExtendedInventoryConta
 
     protected void updateCraftingPlanJob() {
         HandlerWrappedTerminalCraftingOption craftingOptionWrapper = this.craftingOptionGuiData.getCraftingOption();
-        INetwork network = NetworkHelpers.getNetwork(target.getCenter());
+        INetwork network;
+        if (this.isItem) {
+            network = ItemTerminalStoragePortable.getNetworkFromItem(InventoryHelpers.getItemFromIndex(player, itemIndex, ItemTerminalStoragePortable.getInstance()));
+        } else {
+            network = NetworkHelpers.getNetwork(target.getCenter());
+        }
         this.setCraftingPlan(craftingOptionWrapper.getHandler().calculateCraftingPlan(network,
                 this.craftingOptionGuiData.getChannel(), craftingOptionWrapper.getCraftingOption(), this.craftingOptionGuiData.getAmount()));
     }
@@ -116,19 +150,33 @@ public class ContainerTerminalStorageCraftingPlan extends ExtendedInventoryConta
         if (!world.isRemote) {
             // Start the crafting job
             if (craftingPlan != null) {
-                INetwork network = NetworkHelpers.getNetwork(PartPos.of(world, craftingOptionGuiData.getPos(), craftingOptionGuiData.getSide()));
+                INetwork network;
+                if (isItem) {
+                    network = ItemTerminalStoragePortable.getNetworkFromItem(InventoryHelpers.getItemFromIndex(player, itemIndex, ItemTerminalStoragePortable.getInstance()));
+                } else {
+                    network = NetworkHelpers.getNetwork(PartPos.of(world, craftingOptionGuiData.getPos(), craftingOptionGuiData.getSide()));
+                }
                 if (network != null) {
                     try {
                         craftingOptionGuiData.getCraftingOption().getHandler()
                                 .startCraftingJob(network, craftingOptionGuiData.getChannel(), craftingPlan, (EntityPlayerMP) player);
 
                         // Re-open terminal gui
-                        IntegratedTerminals._instance.getGuiHandler().setTemporaryData(ExtendedGuiHandler.TERMINAL_STORAGE,
-                                Pair.of(craftingOptionGuiData.getSide(), new ContainerTerminalStorage.InitTabData(
-                                        craftingOptionGuiData.getTabName(), craftingOptionGuiData.getChannel())));
-                        BlockPos pos = craftingOptionGuiData.getPos();
-                        player.openGui(IntegratedTerminals._instance, GuiProviders.ID_GUI_TERMINAL_STORAGE_INIT,
-                                world, pos.getX(), pos.getY(), pos.getZ());
+                        ContainerTerminalStorage.InitTabData initTabData = new ContainerTerminalStorage.InitTabData(
+                                craftingOptionGuiData.getTabName(), craftingOptionGuiData.getChannel());
+                        if (isItem) {
+                            IntegratedTerminals._instance.getGuiHandler().setTemporaryData(ExtendedGuiHandler.TERMINAL_STORAGE_ITEM,
+                                    Pair.of(itemIndex, initTabData));
+                            player.openGui(IntegratedTerminals._instance, GuiProviders.ID_GUI_TERMINAL_STORAGE_INIT_ITEM,
+                                    world, player.getPosition().getX(), player.getPosition().getY(), player.getPosition().getZ());
+                        } else {
+                            IntegratedTerminals._instance.getGuiHandler().setTemporaryData(ExtendedGuiHandler.TERMINAL_STORAGE,
+                                    Pair.of(craftingOptionGuiData.getSide(), initTabData));
+                            BlockPos pos = craftingOptionGuiData.getPos();
+                            player.openGui(IntegratedTerminals._instance, GuiProviders.ID_GUI_TERMINAL_STORAGE_INIT,
+                                    world, pos.getX(), pos.getY(), pos.getZ());
+                        }
+
                     } catch (CraftingJobStartException e) {
                         // If the job could not be started, display the error in the plan
                         craftingPlan.setError(e.getUnlocalizedError());
@@ -138,9 +186,15 @@ public class ContainerTerminalStorageCraftingPlan extends ExtendedInventoryConta
             }
         } else {
             // Prepare terminal gui data
-            IntegratedTerminals._instance.getGuiHandler().setTemporaryData(ExtendedGuiHandler.TERMINAL_STORAGE,
-                    Pair.of(craftingOptionGuiData.getSide(), new ContainerTerminalStorage.InitTabData(
-                            craftingOptionGuiData.getTabName(), craftingOptionGuiData.getChannel())));
+            if (isItem) {
+                IntegratedTerminals._instance.getGuiHandler().setTemporaryData(ExtendedGuiHandler.TERMINAL_STORAGE_ITEM,
+                        Pair.of(itemIndex, new ContainerTerminalStorage.InitTabData(
+                                craftingOptionGuiData.getTabName(), craftingOptionGuiData.getChannel())));
+            } else {
+                IntegratedTerminals._instance.getGuiHandler().setTemporaryData(ExtendedGuiHandler.TERMINAL_STORAGE,
+                        Pair.of(craftingOptionGuiData.getSide(), new ContainerTerminalStorage.InitTabData(
+                                craftingOptionGuiData.getTabName(), craftingOptionGuiData.getChannel())));
+            }
         }
     }
 

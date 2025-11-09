@@ -19,7 +19,7 @@ public class ContainerLogicProgrammerPortable extends ContainerLogicProgrammerBa
     }
 
     public ItemStack getItemStack(EntityPlayer player) {
-        return InventoryHelpers.getItemFromIndex(player, itemIndex);
+        return InventoryHelpers.getItemFromIndex(player, itemIndex, ItemPortableLogicProgrammer.getInstance());
     }
 
     @Override

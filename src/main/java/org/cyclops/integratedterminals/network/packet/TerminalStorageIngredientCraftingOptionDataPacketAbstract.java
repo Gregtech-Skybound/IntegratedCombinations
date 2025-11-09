@@ -1,5 +1,6 @@
 package org.cyclops.integratedterminals.network.packet;
 
+import lombok.Getter;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
@@ -30,25 +31,39 @@ public abstract class TerminalStorageIngredientCraftingOptionDataPacketAbstract<
     private BlockPos pos;
     @CodecField
     private EnumFacing side;
+    @Getter
     @CodecField
     private String tabName;
+    @Getter
     @CodecField
     private int channel;
     @CodecField
     private NBTTagCompound craftingOption;
+    @Getter
     @CodecField
     private int amount;
     @CodecField
     private NBTTagCompound craftingPlan;
+    @CodecField
+    private int itemIndex;
+    @CodecField
+    private boolean isItem;
 
     public TerminalStorageIngredientCraftingOptionDataPacketAbstract() {
 
     }
 
     public TerminalStorageIngredientCraftingOptionDataPacketAbstract(CraftingOptionGuiData<T, M> craftingOptionData) {
+        if (craftingOptionData.isItem()) {
+            this.pos = new BlockPos(1, 1, 1);
+            this.side = EnumFacing.NORTH;
+        } else {
+            this.pos = craftingOptionData.getPos();
+            this.side = craftingOptionData.getSide();
+        }
+        this.isItem = craftingOptionData.isItem();
+        this.itemIndex = craftingOptionData.getItemIndex();
         this.ingredientComponent = craftingOptionData.getComponent().getName().toString();
-        this.pos = craftingOptionData.getPos();
-        this.side = craftingOptionData.getSide();
         this.tabName = craftingOptionData.getTabName();
         this.channel = craftingOptionData.getChannel();
         this.craftingOption = craftingOptionData.getCraftingOption() != null
@@ -97,20 +112,12 @@ public abstract class TerminalStorageIngredientCraftingOptionDataPacketAbstract<
         return (IngredientComponent<T, M>) component;
     }
 
-    public int getChannel() {
-        return channel;
-    }
-
-    public String getTabName() {
-        return tabName;
-    }
-
-    public int getAmount() {
-        return amount;
-    }
-
     public CraftingOptionGuiData<T, M> getCraftingOptionData() {
         IngredientComponent<T, M> ingredientComponent = getIngredientComponent();
+        if (this.isItem) {
+            return new CraftingOptionGuiData<>(itemIndex, ingredientComponent, tabName, channel,
+                    getCraftingOption(ingredientComponent), amount, getCraftingPlan());
+        }
         return new CraftingOptionGuiData<>(pos, side, ingredientComponent, tabName, channel,
                 getCraftingOption(ingredientComponent), amount, getCraftingPlan());
     }

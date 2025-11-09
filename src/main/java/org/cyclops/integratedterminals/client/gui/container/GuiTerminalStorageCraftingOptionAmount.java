@@ -30,6 +30,7 @@ import org.cyclops.integratedterminals.capability.ingredient.IngredientComponent
 import org.cyclops.integratedterminals.core.client.gui.CraftingOptionGuiData;
 import org.cyclops.integratedterminals.core.client.gui.ExtendedGuiHandler;
 import org.cyclops.integratedterminals.inventory.container.ContainerTerminalStorageCraftingOptionAmount;
+import org.cyclops.integratedterminals.network.packet.PortableTerminalStorageIngredientOpenPacket;
 import org.cyclops.integratedterminals.network.packet.TerminalStorageIngredientOpenCraftingPlanGuiPacket;
 import org.cyclops.integratedterminals.network.packet.TerminalStorageIngredientOpenPacket;
 import org.lwjgl.input.Keyboard;
@@ -57,6 +58,20 @@ public class GuiTerminalStorageCraftingOptionAmount extends GuiContainerExtended
     public GuiTerminalStorageCraftingOptionAmount(EntityPlayer player, PartTarget target, IPartContainer partContainer,
                                                   IPartType partType, CraftingOptionGuiData craftingOptionGuiData) {
         super(new ContainerTerminalStorageCraftingOptionAmount(player, target, partContainer, partType, craftingOptionGuiData));
+
+        this.craftingOptionGuiData = craftingOptionGuiData;
+
+        this.outputs = Lists.newArrayList();
+        ITerminalCraftingOption<?> option = craftingOptionGuiData.getCraftingOption().getCraftingOption();
+        for (IngredientComponent<?, ?> outputComponent : option.getOutputComponents()) {
+            for (Object output : option.getOutputs(outputComponent)) {
+                this.outputs.add(new PrototypedIngredient(outputComponent, output, null));
+            }
+        }
+    }
+
+    public GuiTerminalStorageCraftingOptionAmount(EntityPlayer player, int itemIndex, CraftingOptionGuiData craftingOptionGuiData) {
+        super(new ContainerTerminalStorageCraftingOptionAmount(player, itemIndex, craftingOptionGuiData));
 
         this.craftingOptionGuiData = craftingOptionGuiData;
 
@@ -138,8 +153,12 @@ public class GuiTerminalStorageCraftingOptionAmount extends GuiContainerExtended
     }
 
     private void returnToTerminalStorage() {
-        TerminalStorageIngredientOpenPacket.send(craftingOptionGuiData.getPos(), craftingOptionGuiData.getSide(),
-                craftingOptionGuiData.getTabName(), craftingOptionGuiData.getChannel());
+        if (craftingOptionGuiData.isItem()) {
+            PortableTerminalStorageIngredientOpenPacket.send(craftingOptionGuiData.getItemIndex(), craftingOptionGuiData.getTabName(), craftingOptionGuiData.getChannel());
+        } else {
+            TerminalStorageIngredientOpenPacket.send(craftingOptionGuiData.getPos(), craftingOptionGuiData.getSide(),
+                    craftingOptionGuiData.getTabName(), craftingOptionGuiData.getChannel());
+        }
     }
 
     @Override
@@ -167,10 +186,17 @@ public class GuiTerminalStorageCraftingOptionAmount extends GuiContainerExtended
 
     private void calculateCraftingJob() {
         CraftingOptionGuiData craftingOptionData = CraftingOptionGuiData.copyWithAmount(craftingOptionGuiData, getAmount());
-        IntegratedTerminals._instance.getGuiHandler().setTemporaryData(ExtendedGuiHandler.CRAFTING_OPTION,
-                Pair.of(craftingOptionData.getSide(), craftingOptionData));
-        IntegratedTerminals._instance.getPacketHandler().sendToServer(
-                new TerminalStorageIngredientOpenCraftingPlanGuiPacket(craftingOptionData));
+        if (craftingOptionData.isItem()) {
+            IntegratedTerminals._instance.getGuiHandler().setTemporaryData(ExtendedGuiHandler.CRAFTING_OPTION_ITEM,
+                    Pair.of(craftingOptionData.getItemIndex(), craftingOptionData));
+            IntegratedTerminals._instance.getPacketHandler().sendToServer(
+                    new TerminalStorageIngredientOpenCraftingPlanGuiPacket(craftingOptionData));
+        } else {
+            IntegratedTerminals._instance.getGuiHandler().setTemporaryData(ExtendedGuiHandler.CRAFTING_OPTION,
+                    Pair.of(craftingOptionData.getSide(), craftingOptionData));
+            IntegratedTerminals._instance.getPacketHandler().sendToServer(
+                    new TerminalStorageIngredientOpenCraftingPlanGuiPacket(craftingOptionData));
+        }
     }
 
     protected <T, M> void drawInstance(IngredientComponent<T, M> ingredientComponent, T instance, int x, int y, GuiTerminalStorage.DrawLayer layer, float partialTick, int mouseX, int mouseY) {

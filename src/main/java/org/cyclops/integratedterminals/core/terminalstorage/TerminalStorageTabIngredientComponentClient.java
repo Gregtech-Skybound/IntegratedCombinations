@@ -605,12 +605,21 @@ public class TerminalStorageTabIngredientComponentClient<T, M>
             }
             if (initiateCraftingOption) {
                 ContainerTerminalStorage containerTerminalStorage = ((ContainerTerminalStorage) container);
-                PartPos pos = containerTerminalStorage.getTarget().getCenter();
-                CraftingOptionGuiData<T, M> craftingOptionData = new CraftingOptionGuiData<>(pos.getPos().getBlockPos(), pos.getSide(),
-                        ingredientComponent, this.getName().toString(), channel,
-                        ((TerminalStorageSlotIngredientCraftingOption<T, M>) hoveringStorageSlotObject.get()).getCraftingOption(), 1, null);
-                IntegratedTerminals._instance.getGuiHandler().setTemporaryData(ExtendedGuiHandler.CRAFTING_OPTION,
-                        Pair.of(((ContainerTerminalStorage) container).getTarget().getCenter().getSide(), craftingOptionData)); // Pass the side as extra data to the gui
+                CraftingOptionGuiData<T, M> craftingOptionData;
+                if (!containerTerminalStorage.isItem()) {
+                    PartPos pos = containerTerminalStorage.getTarget().getCenter();
+                    craftingOptionData = new CraftingOptionGuiData<>(pos.getPos().getBlockPos(), pos.getSide(),
+                            ingredientComponent, this.getName().toString(), channel,
+                            ((TerminalStorageSlotIngredientCraftingOption<T, M>) hoveringStorageSlotObject.get()).getCraftingOption(), 1, null);
+                    IntegratedTerminals._instance.getGuiHandler().setTemporaryData(ExtendedGuiHandler.CRAFTING_OPTION,
+                            Pair.of(containerTerminalStorage.getTarget().getCenter().getSide(), craftingOptionData)); // Pass the side as extra data to the gui
+                } else {
+                    craftingOptionData = new CraftingOptionGuiData<>(containerTerminalStorage.getItemIndex(),
+                            ingredientComponent, this.getName().toString(), channel,
+                            ((TerminalStorageSlotIngredientCraftingOption<T, M>) hoveringStorageSlotObject.get()).getCraftingOption(), 1, null);
+                    IntegratedTerminals._instance.getGuiHandler().setTemporaryData(ExtendedGuiHandler.CRAFTING_OPTION_ITEM,
+                            Pair.of(containerTerminalStorage.getItemIndex(), craftingOptionData)); // Pass the itemIndex as extra data to the gui
+                }
                 if (shift) {
                     IntegratedTerminals._instance.getPacketHandler().sendToServer(
                             new TerminalStorageIngredientOpenCraftingPlanGuiPacket<>(craftingOptionData));

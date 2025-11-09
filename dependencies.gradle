@@ -47,7 +47,7 @@ repositories {
 
 dependencies {
     implementation rfg.deobf(files('libs/commoncapabilities-1.12.2-3.0.0-dev.jar'))
-    implementation rfg.deobf('curse.maven:cyclops_core-232758:3159497')
+    implementation rfg.deobf(files('libs/CyclopsCore-1.12.2-3.0.0-dev.jar'))
 
     compileOnly("org.projectlombok:lombok:1.18.42")
     annotationProcessor("org.projectlombok:lombok:1.18.42")
@@ -70,5 +70,6 @@ dependencies {
     compileOnly rfg.deobf("curse.maven:refined_storage-243076:2940914")
     compileOnly rfg.deobf("curse.maven:hwyla-253449:2568751")
     compileOnly rfg.deobf("curse.maven:tconstruct-74072:2902483")
+    compileOnly rfg.deobf("curse.maven:baubles-227083:2518667")
     compileOnly 'curse.maven:crafttweaker-239197:6929088'
 }

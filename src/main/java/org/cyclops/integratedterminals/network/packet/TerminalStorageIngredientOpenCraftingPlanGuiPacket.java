@@ -27,11 +27,18 @@ public class TerminalStorageIngredientOpenCraftingPlanGuiPacket<T, M> extends Te
     @Override
     public void actionServer(World world, EntityPlayerMP player) {
         CraftingOptionGuiData<T, M> data = getCraftingOptionData();
-        IntegratedTerminals._instance.getGuiHandler().setTemporaryData(ExtendedGuiHandler.CRAFTING_OPTION,
-                Pair.of(data.getSide(), data));
-        BlockPos cPos = data.getPos();
-        player.openGui(IntegratedTerminals._instance, GuiProviders.ID_GUI_TERMINAL_STORAGE_CRAFTNG_PLAN,
-                world, cPos.getX(), cPos.getY(), cPos.getZ());
+        if (!data.isItem()) {
+            IntegratedTerminals._instance.getGuiHandler().setTemporaryData(ExtendedGuiHandler.CRAFTING_OPTION,
+                    Pair.of(data.getSide(), data));
+            BlockPos cPos = data.getPos();
+            player.openGui(IntegratedTerminals._instance, GuiProviders.ID_GUI_TERMINAL_STORAGE_CRAFTNG_PLAN,
+                    world, cPos.getX(), cPos.getY(), cPos.getZ());
+        } else {
+            IntegratedTerminals._instance.getGuiHandler().setTemporaryData(ExtendedGuiHandler.CRAFTING_OPTION_ITEM,
+                    Pair.of(data.getItemIndex(), data));
+            player.openGui(IntegratedTerminals._instance, GuiProviders.ID_GUI_TERMINAL_STORAGE_CRAFTNG_PLAN_ITEM,
+                    player.world, player.getPosition().getX(), player.getPosition().getY(), player.getPosition().getZ());
+        }
     }
 
 }
