@@ -41,7 +41,6 @@ public abstract class PositionedAddonsNetworkIngredients<T, M> extends Positione
     private final Int2ObjectMap<IngredientPositionsIndex<T, M>> indexes;
     private final Object2ObjectOpenHashMap<PartPos, IIngredientComponentStorage<T, M>> cacheStorage;
     private final Int2IntMap cacheChannelSlots;
-    private final Object2BooleanOpenHashMap cacheIsLoaded;
     private boolean observe;
     private final Map<PartPos, Long> lastSecondDurations = Maps.newHashMap();
 
@@ -55,7 +54,6 @@ public abstract class PositionedAddonsNetworkIngredients<T, M> extends Positione
         // The caches are invalidated after every tick
         this.cacheStorage = new Object2ObjectOpenHashMap<>();
         this.cacheChannelSlots = new Int2IntOpenHashMap();
-        this.cacheIsLoaded = new Object2BooleanOpenHashMap<>();
 
         this.observe = false;
     }
@@ -232,7 +230,7 @@ public abstract class PositionedAddonsNetworkIngredients<T, M> extends Positione
         IIngredientComponentStorageWrapperHandler<T, M, S> wrapperHandler = getComponent()
                 .getStorageWrapperHandler(capability);
         return wrapperHandler != null ? wrapperHandler.wrapStorage(new IngredientChannelAdapterWrapperSlotted<>(
-                (IngredientChannelAdapter<T, M>) getChannel(channel), this.cacheChannelSlots, this.cacheIsLoaded)) : null;
+                (IngredientChannelAdapter<T, M>) getChannel(channel), this.cacheChannelSlots)) : null;
     }
 
     @Override
@@ -265,7 +263,6 @@ public abstract class PositionedAddonsNetworkIngredients<T, M> extends Positione
         // Clear caches after each tick
         this.cacheStorage.clear();
         this.cacheChannelSlots.clear();
-        this.cacheIsLoaded.clear();
     }
 
     @Override

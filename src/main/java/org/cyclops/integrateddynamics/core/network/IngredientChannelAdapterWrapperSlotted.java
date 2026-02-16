@@ -32,12 +32,10 @@ public class IngredientChannelAdapterWrapperSlotted<T, M> implements IIngredient
 
     private final IngredientChannelAdapter<T, M> channel;
     private final Int2IntMap cacheChannelSlots;
-    private final Object2BooleanOpenHashMap cacheIsLoaded;
 
-    public IngredientChannelAdapterWrapperSlotted(IngredientChannelAdapter<T, M> channel, Int2IntMap cacheChannelSlots, Object2BooleanOpenHashMap cacheIsLoaded) {
+    public IngredientChannelAdapterWrapperSlotted(IngredientChannelAdapter<T, M> channel, Int2IntMap cacheChannelSlots) {
         this.channel = channel;
         this.cacheChannelSlots = cacheChannelSlots;
-        this.cacheIsLoaded = cacheIsLoaded;
 
     }
 
@@ -63,15 +61,8 @@ public class IngredientChannelAdapterWrapperSlotted<T, M> implements IIngredient
         for (PrioritizedPartPos prioritizedPos : network.getPositions()) {
             PartPos pos = prioritizedPos.getPartPos();
             // Skip if the position is not loaded or disabled
-            if (this.cacheIsLoaded.containsKey(pos)) {
-                if (!cacheIsLoaded.getBoolean(pos))
-                    continue;
-            } else {
-                if (!pos.getPos().isLoaded()) {
-                    this.cacheIsLoaded.put(pos, false);
-                    continue;
-                }
-                this.cacheIsLoaded.put(pos, true);
+            if (!pos.getPos().isLoaded()) {
+                continue;
             }
             if (network.isPositionDisabled(pos)) {
                 hasDisabledPosition = true;
@@ -97,15 +88,8 @@ public class IngredientChannelAdapterWrapperSlotted<T, M> implements IIngredient
             if (network.isPositionDisabled(pos)) {
                 continue;
             }
-            if (this.cacheIsLoaded.containsKey(pos)) {
-                if (!cacheIsLoaded.getBoolean(pos))
-                    continue;
-            } else {
-                if (!pos.getPos().isLoaded()) {
-                    this.cacheIsLoaded.put(pos, false);
-                    continue;
-                }
-                this.cacheIsLoaded.put(pos, true);
+            if (!pos.getPos().isLoaded()) {
+                continue;
             }
 
             network.disablePosition(pos);
