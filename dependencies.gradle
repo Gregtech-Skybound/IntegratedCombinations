@@ -71,5 +71,6 @@ dependencies {
     compileOnly rfg.deobf("curse.maven:hwyla-253449:2568751")
     compileOnly rfg.deobf("curse.maven:tconstruct-74072:2902483")
     compileOnly rfg.deobf("curse.maven:baubles-227083:2518667")
+    implementation rfg.deobf("curse.maven:MUI-624243:7202582")
     compileOnly 'curse.maven:crafttweaker-239197:6929088'
 }
