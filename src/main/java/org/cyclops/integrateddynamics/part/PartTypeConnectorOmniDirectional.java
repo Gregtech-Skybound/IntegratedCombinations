@@ -182,7 +182,6 @@ public class PartTypeConnectorOmniDirectional extends PartTypeConnector<PartType
                 }
                 NBTTagCompound tag = ItemStackHelpers.getSafeTagCompound(event.crafting);
                 tag.setInteger(NBT_KEY_ID, groupId);
-                event.crafting.setTagCompound(tag);
             }
         }
     }
