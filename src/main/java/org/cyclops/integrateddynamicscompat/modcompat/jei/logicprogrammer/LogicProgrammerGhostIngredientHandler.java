@@ -8,6 +8,7 @@ import net.minecraftforge.fluids.FluidUtil;
 import org.cyclops.cyclopscore.inventory.SimpleInventory;
 import org.cyclops.integrateddynamics.client.gui.GuiLogicProgrammerBase;
 import org.cyclops.integrateddynamicscompat.IntegratedDynamicsCompat;
+import org.cyclops.integrateddynamicscompat.network.packet.CPacketJEIDraggingLP;
 import org.cyclops.integrateddynamicscompat.network.packet.CPacketSetSlot;
 
 import javax.annotation.Nonnull;
@@ -35,11 +36,11 @@ public class LogicProgrammerGhostIngredientHandler<T extends GuiLogicProgrammerB
                         public void accept(@Nonnull I ingredient) {
                             if (ingredient instanceof ItemStack) {
                                 IntegratedDynamicsCompat._instance.getPacketHandler().sendToServer(
-                                        new CPacketSetSlot(gui.getContainer().windowId, slot.getSlotIndex(), (ItemStack) ingredient));
+                                        new CPacketJEIDraggingLP(slot.getSlotIndex(), (ItemStack) ingredient));
                             } else if (ingredient instanceof FluidStack) {
                                 ItemStack s = FluidUtil.getFilledBucket((FluidStack) ingredient);
                                 IntegratedDynamicsCompat._instance.getPacketHandler().sendToServer(
-                                        new CPacketSetSlot(gui.getContainer().windowId, slot.getSlotIndex(), s));
+                                        new CPacketJEIDraggingLP(slot.getSlotIndex(), s));
                             }
                         }
                     });
