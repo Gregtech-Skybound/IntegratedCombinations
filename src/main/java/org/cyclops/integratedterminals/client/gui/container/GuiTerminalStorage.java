@@ -56,6 +56,7 @@ import java.util.*;
 /**
  * @author rubensworks
  */
+@net.minecraftforge.fml.common.Optional.Interface(modid = "mousetweaks", iface = "yalter.mousetweaks.api.IMTModGuiContainer2Ex")
 public class GuiTerminalStorage extends GuiContainerExtended implements IMTModGuiContainer2Ex {
 
     private static final int TAB_OFFSET_X = 24;
@@ -136,7 +137,7 @@ public class GuiTerminalStorage extends GuiContainerExtended implements IMTModGu
             public int getTotalRows() {
                 ContainerTerminalStorage container = getContainer();
                 Optional<ITerminalStorageTabClient<?>> tabOptional = getSelectedClientTab();
-                if (tabOptional.isEmpty()) {
+                if (!tabOptional.isPresent()) {
                     return 0;
                 }
                 int totalSlots = tabOptional.get().getSlotCount(container.getSelectedChannel());
