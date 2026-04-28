@@ -3,6 +3,7 @@ package org.cyclops.integratedterminals.client.gui.container;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.gui.GuiButton;
@@ -12,11 +13,14 @@ import net.minecraft.client.renderer.RenderItem;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
+import net.minecraft.inventory.ClickType;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
 import org.apache.commons.lang3.tuple.Triple;
+import org.cyclops.commoncapabilities.api.ingredient.IIngredientMatcher;
+import org.cyclops.commoncapabilities.api.ingredient.IngredientComponent;
 import org.cyclops.cyclopscore.client.gui.RenderItemExtendedSlotCount;
 import org.cyclops.cyclopscore.client.gui.component.GuiScrollBar;
 import org.cyclops.cyclopscore.client.gui.component.input.GuiArrowedListField;
@@ -33,62 +37,61 @@ import org.cyclops.integrateddynamics.api.part.IPartType;
 import org.cyclops.integrateddynamics.api.part.PartTarget;
 import org.cyclops.integratedterminals.IntegratedTerminals;
 import org.cyclops.integratedterminals.Reference;
-import org.cyclops.integratedterminals.api.terminalstorage.ITerminalButton;
-import org.cyclops.integratedterminals.api.terminalstorage.ITerminalStorageSlot;
-import org.cyclops.integratedterminals.api.terminalstorage.ITerminalStorageTabClient;
-import org.cyclops.integratedterminals.api.terminalstorage.ITerminalStorageTabCommon;
+import org.cyclops.integratedterminals.api.terminalstorage.*;
+import org.cyclops.integratedterminals.core.terminalstorage.TerminalStorageTabIngredientComponentClient;
 import org.cyclops.integratedterminals.core.terminalstorage.TerminalStorageTabIngredientComponentItemStackCraftingCommon;
 import org.cyclops.integratedterminals.core.terminalstorage.button.TerminalButtonItemStackCraftingGridClear;
+import org.cyclops.integratedterminals.inventory.SlotCraftingAutoRefill;
 import org.cyclops.integratedterminals.inventory.container.ContainerTerminalStorage;
 import org.cyclops.integratedterminals.network.packet.TerminalStorageIngredientItemStackCraftingGridBalance;
+import org.cyclops.integratedterminals.network.packet.TerminalStorageIngredientSlotClickPacket;
 import org.cyclops.integratedterminals.proxy.ClientProxy;
 import org.lwjgl.opengl.GL11;
+import yalter.mousetweaks.api.IMTModGuiContainer2Ex;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author rubensworks
  */
-public class GuiTerminalStorage extends GuiContainerExtended {
+public class GuiTerminalStorage extends GuiContainerExtended implements IMTModGuiContainer2Ex {
 
-    private static int TAB_OFFSET_X = 24;
-    private static int TAB_WIDTH = 24;
-    private static int TAB_UNSELECTED_HEIGHT = 21;
-    private static int TAB_SELECTED_HEIGHT = 24;
-    private static int TAB_ICON_OFFSET = 4;
-    private static int TAB_UNSELECTED_TEXTURE_X = 0;
-    private static int TAB_SELECTED_TEXTURE_X = 24;
-    private static int TAB_UNSELECTED_TEXTURE_Y = 225;
-    private static int TAB_SELECTED_TEXTURE_Y = 225;
-    private static int SCROLL_X = 198;
-    private static int SCROLL_Y = 39;
-    private static int SCROLL_HEIGHT = 88;
+    private static final int TAB_OFFSET_X = 24;
+    private static final int TAB_WIDTH = 24;
+    private static final int TAB_UNSELECTED_HEIGHT = 21;
+    private static final int TAB_SELECTED_HEIGHT = 24;
+    private static final int TAB_ICON_OFFSET = 4;
+    private static final int TAB_UNSELECTED_TEXTURE_X = 0;
+    private static final int TAB_SELECTED_TEXTURE_X = 24;
+    private static final int TAB_UNSELECTED_TEXTURE_Y = 225;
+    private static final int TAB_SELECTED_TEXTURE_Y = 225;
+    private static final int SCROLL_X = 198;
+    private static final int SCROLL_Y = 39;
+    private static final int SCROLL_HEIGHT = 88;
 
-    private static int SEARCH_X = 104;
-    private static int SEARCH_Y = 27;
-    private static int SEARCH_WIDTH = 80;
-    private static int SEARCH_HEIGHT = 20;
+    private static final int SEARCH_X = 104;
+    private static final int SEARCH_Y = 27;
+    private static final int SEARCH_WIDTH = 80;
+    private static final int SEARCH_HEIGHT = 20;
 
-    private static int CHANNEL_X = 58;
-    private static int CHANNEL_Y = 25;
-    private static int CHANNEL_WIDTH = 42;
-    private static int CHANNEL_HEIGHT = 15;
+    private static final int CHANNEL_X = 58;
+    private static final int CHANNEL_Y = 25;
+    private static final int CHANNEL_WIDTH = 42;
+    private static final int CHANNEL_HEIGHT = 15;
 
-    private static int BUTTONS_OFFSET_X = 0;
-    private static int BUTTONS_OFFSET_Y = 22;
-    private static int BUTTONS_OFFSET = 4;
+    private static final int BUTTONS_OFFSET_X = 0;
+    private static final int BUTTONS_OFFSET_Y = 22;
+    private static final int BUTTONS_OFFSET = 4;
 
     private GuiArrowedListField<String> fieldChannel;
     private GuiScrollBar scrollBar;
+    @Getter
     private GuiTextFieldExtended fieldSearch;
     private int firstRow;
     private boolean initialized;
-    protected final Set<Slot> terminalDragSplittingSlots = Sets.<Slot>newHashSet();
+    protected final Set<Slot> terminalDragSplittingSlots = Sets.newHashSet();
     protected boolean terminalDragSplitting;
     private int terminalDragMode;
     private int terminalDragSplittingButton;
@@ -133,7 +136,7 @@ public class GuiTerminalStorage extends GuiContainerExtended {
             public int getTotalRows() {
                 ContainerTerminalStorage container = getContainer();
                 Optional<ITerminalStorageTabClient<?>> tabOptional = getSelectedClientTab();
-                if (!tabOptional.isPresent()) {
+                if (tabOptional.isEmpty()) {
                     return 0;
                 }
                 int totalSlots = tabOptional.get().getSlotCount(container.getSelectedChannel());
@@ -462,7 +465,6 @@ public class GuiTerminalStorage extends GuiContainerExtended {
                         && tab.isSlotValidForDraggingInto(getContainer().getSelectedChannel(), slot)) {
                     this.terminalDragSplittingSlots.add(slot);
                     this.updateTerminalDragSplitting(tab);
-                    return;
                 }
             }
         });
@@ -794,14 +796,85 @@ public class GuiTerminalStorage extends GuiContainerExtended {
         }
     }
 
-    public GuiTextFieldExtended getFieldSearch() {
-        return fieldSearch;
+    @Override
+    public boolean MT_isMouseTweaksDisabled() {
+        return false;
+    }
+
+    @Override
+    public boolean MT_isWheelTweakDisabled() {
+        return true;
+    }
+
+    @Override
+    public List<Slot> MT_getSlots() {
+        // There are no slots in the inventory itself, because of a custom renderer from ITer
+        return new ArrayList<>();
+    }
+
+    @Override
+    public Slot MT_getSlotUnderMouse() {
+        return getSlotUnderMouse();
+    }
+
+    @Override
+    public boolean MT_isCraftingOutput(Slot slot) {
+        return slot instanceof SlotCraftingAutoRefill;
+    }
+
+    @Override
+    public boolean MT_isIgnored(Slot slot) {
+        return false;
+    }
+
+    @Override
+    public boolean MT_disableRMBDraggingFunctionality() {
+        if (terminalDragSplitting) {
+            if (terminalDragSplittingButton == 1) {
+                terminalDragSplitting = false;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public void MT_clickSlot(Slot slot, int mouseButton, ClickType clickType) {
+        if (clickType != ClickType.QUICK_MOVE) {
+            handleMouseClick(slot, slot.slotNumber, mouseButton, clickType);
+            return;
+        }
+
+        int slotNumber = slot.slotNumber;
+        ContainerTerminalStorage terminalContainer = (ContainerTerminalStorage) container;
+        int channel = terminalContainer.getSelectedChannel();
+        String tab = terminalContainer.getSelectedTab();
+        if (tab == null || !tab.startsWith("minecraft:itemstack")) return;
+
+        ITerminalStorageTabClient<?> tabClient = terminalContainer.getTabClient(tab);
+
+        if (tabClient instanceof TerminalStorageTabIngredientComponentClient) {
+            TerminalStorageTabIngredientComponentClient<ItemStack, Integer> tabClient2 = (TerminalStorageTabIngredientComponentClient<ItemStack, Integer>) tabClient;
+            IngredientComponent<ItemStack, Integer> component = tabClient2.getIngredientComponent();
+            IIngredientMatcher<ItemStack, Integer> matcher = component.getMatcher();
+            TerminalStorageIngredientSlotClickPacket<ItemStack> packet = new TerminalStorageIngredientSlotClickPacket<>(
+                    tab, component, TerminalClickType.PLAYER_QUICK_MOVE, channel,
+                    matcher.getEmptyInstance(), slotNumber, 0L, matcher.getEmptyInstance(), true);
+            IntegratedTerminals._instance.getPacketHandler().sendToServer(packet);
+        }
+    }
+
+    @Override
+    public int MT_scrollIsItemPrioritizedForSlot(Slot slot, ItemStack stack) {
+        // This only applies to mouse wheel, which we have disabled
+        return 0;
     }
 
     /**
      * The layer to draw on.
      */
-    public static enum DrawLayer {
+    public enum DrawLayer {
         BACKGROUND,
         FOREGROUND
     }
