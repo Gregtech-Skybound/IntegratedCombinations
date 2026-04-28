@@ -6,7 +6,6 @@ import mezz.jei.api.IModRegistry;
 import mezz.jei.api.JEIPlugin;
 import mezz.jei.api.recipe.IRecipeCategoryRegistration;
 import net.minecraft.item.ItemStack;
-import org.cyclops.cyclopscore.config.ConfigHandler;
 import org.cyclops.integrateddynamics.IntegratedDynamics;
 import org.cyclops.integrateddynamics.block.BlockDryingBasin;
 import org.cyclops.integrateddynamics.block.BlockDryingBasinConfig;
@@ -17,6 +16,7 @@ import org.cyclops.integrateddynamics.block.BlockMechanicalSqueezer;
 import org.cyclops.integrateddynamics.block.BlockMechanicalSqueezerConfig;
 import org.cyclops.integrateddynamics.block.BlockSqueezer;
 import org.cyclops.integrateddynamics.block.BlockSqueezerConfig;
+import org.cyclops.integrateddynamics.client.gui.GuiLogicProgrammerBase;
 import org.cyclops.integrateddynamics.client.gui.GuiMechanicalDryingBasin;
 import org.cyclops.integrateddynamics.client.gui.GuiMechanicalSqueezer;
 import org.cyclops.integrateddynamics.inventory.container.ContainerLogicProgrammer;
@@ -26,6 +26,7 @@ import org.cyclops.integrateddynamics.inventory.container.ContainerMechanicalSqu
 import org.cyclops.integrateddynamics.item.ItemPortableLogicProgrammerConfig;
 import org.cyclops.integrateddynamicscompat.modcompat.jei.dryingbasin.DryingBasinRecipeCategory;
 import org.cyclops.integrateddynamicscompat.modcompat.jei.dryingbasin.DryingBasinRecipeJEI;
+import org.cyclops.integrateddynamicscompat.modcompat.jei.logicprogrammer.LogicProgrammerGhostIngredientHandler;
 import org.cyclops.integrateddynamicscompat.modcompat.jei.logicprogrammer.LogicProgrammerTransferHandler;
 import org.cyclops.integrateddynamicscompat.modcompat.jei.mechanicaldryingbasin.MechanicalDryingBasinRecipeCategory;
 import org.cyclops.integrateddynamicscompat.modcompat.jei.mechanicaldryingbasin.MechanicalDryingBasinRecipeJEI;
@@ -84,12 +85,15 @@ public class JEIIntegratedDynamicsConfig implements IModPlugin {
             }
 
             // Logic programmer
-            if (IntegratedDynamics._instance.getConfigHandler().isConfigEnabled(BlockLogicProgrammerConfig.class))
+            if (IntegratedDynamics._instance.getConfigHandler().isConfigEnabled(BlockLogicProgrammerConfig.class)) {
                 registry.getRecipeTransferRegistry().addUniversalRecipeTransferHandler(
-                    new LogicProgrammerTransferHandler<>(ContainerLogicProgrammer.class));
-            if (IntegratedDynamics._instance.getConfigHandler().isConfigEnabled(ItemPortableLogicProgrammerConfig.class))
+                        new LogicProgrammerTransferHandler<>(ContainerLogicProgrammer.class));
+                registry.addGhostIngredientHandler(GuiLogicProgrammerBase.class, new LogicProgrammerGhostIngredientHandler<>());
+            }
+            if (IntegratedDynamics._instance.getConfigHandler().isConfigEnabled(ItemPortableLogicProgrammerConfig.class)) {
                 registry.getRecipeTransferRegistry().addUniversalRecipeTransferHandler(
                         new LogicProgrammerTransferHandler<>(ContainerLogicProgrammerPortable.class));
+            }
         }
     }
 
