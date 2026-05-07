@@ -129,12 +129,7 @@ public class ItemTerminalStoragePortable extends ItemGui {
     }
 
     public static void setNamedInventory(ItemStack stack, String name, NonNullList<ItemStack> inventory) {
-        NBTTagList list;
-        if (stack.getTagCompound().hasKey("namedInventories")) {
-            list = stack.getTagCompound().getTagList("namedInventories", Constants.NBT.TAG_COMPOUND);
-        } else {
-            list = new NBTTagList();
-        }
+        NBTTagList list = new NBTTagList();
         NBTTagCompound listEntry = new NBTTagCompound();
         listEntry.setString("tabName", name);
         listEntry.setInteger("itemCount", inventory.size());
@@ -148,12 +143,7 @@ public class ItemTerminalStoragePortable extends ItemGui {
         for (int i = 0; i < inventory.getSizeInventory(); i++) {
             latestItems.add(inventory.getStackInSlot(i));
         }
-        NBTTagList list;
-        if (stack.getTagCompound().hasKey("namedInventories")) {
-            list = stack.getTagCompound().getTagList("namedInventories", Constants.NBT.TAG_COMPOUND);
-        } else {
-            list = new NBTTagList();
-        }
+        NBTTagList list = new NBTTagList();
         NBTTagCompound listEntry = new NBTTagCompound();
         listEntry.setString("tabName", name);
         listEntry.setInteger("itemCount", latestItems.size());
