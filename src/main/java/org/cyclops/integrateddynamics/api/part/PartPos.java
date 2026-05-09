@@ -22,9 +22,7 @@ public class PartPos implements Comparable<PartPos> {
     private final EnumFacing side;
     private final int hash;
 
-    @Getter
-    @Setter
-    private boolean isDisabled;
+    public final ThreadLocal<Boolean> isDisabled = ThreadLocal.withInitial(() -> Boolean.FALSE);
 
     public static PartPos of(World world, BlockPos pos, @Nullable EnumFacing side) {
         return of(DimPos.of(world, pos), side);

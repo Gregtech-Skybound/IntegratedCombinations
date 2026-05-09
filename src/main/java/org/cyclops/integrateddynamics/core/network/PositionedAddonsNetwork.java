@@ -33,12 +33,6 @@ public abstract class PositionedAddonsNetwork implements IPositionedAddonsNetwor
     private final Set<PrioritizedPartPos> allPositions = Sets.newTreeSet();
     private final Int2ObjectMap<Set<PrioritizedPartPos>> positions = new Int2ObjectOpenHashMap<>();
     private final Map<PartPos, Integer> positionChannels = new Object2IntOpenHashMap<>();
-    // We store the thread id together with the disabled position.
-    // This is to make sure that different threads can safely iterate over positions in parallel
-    // without clashing with each other, as this could lead to problems such as in #194.
-    // This for example applies to the ingredient observer and in-world ingredient movement.
-    private final Object2ObjectOpenHashMap<String, List<PartPos>> disabledPositions = new Object2ObjectOpenHashMap<>();
-
     private IPartPosIteratorHandler partPosIteratorHandler = null;
 
     @Override
@@ -161,36 +155,17 @@ public abstract class PositionedAddonsNetwork implements IPositionedAddonsNetwor
 
     @Override
     public boolean isPositionDisabled(PartPos pos) {
-        String id = Thread.currentThread().getName();
-        if (id.equals("Server thread")) {
-            return pos.isDisabled();
-        }
-        if (disabledPositions.containsKey(id))
-            return disabledPositions.get(id).contains(pos);
-        return false;
+        return pos.isDisabled.get();
     }
 
     @Override
     public void disablePosition(PartPos pos) {
-        String id = Thread.currentThread().getName();
-        if (id.equals("Server thread")) {
-            pos.setDisabled(true);
-            return;
-        }
-        if (disabledPositions.containsKey(id)) {
-            disabledPositions.get(id).add(pos);
-        }
-        disabledPositions.put(id, new ObjectArrayList<>(){{ add(pos); }});
+        pos.isDisabled.set(true);
     }
 
     @Override
     public void enablePosition(PartPos pos) {
-        String id = Thread.currentThread().getName();
-        if (id.equals("Server thread")) {
-            pos.setDisabled(false);
-            return;
-        }
-        disabledPositions.get(id).remove(pos);
+        pos.isDisabled.set(false);
     }
 
 }
